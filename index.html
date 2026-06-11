@@ -139,6 +139,7 @@ thead th .funnel.actif{opacity:1;color:var(--or-doux);}
   <div id="contenu-page" style="display:none;">
   <div class="onglets">
     <button class="onglet actif" data-tab="fact">💵 Factures à payer</button>
+    <button class="onglet" data-tab="bilan">📊 Bilan fournisseurs</button>
     <button class="onglet" data-tab="ec">📒 État de compte fournisseurs</button>
     <button class="onglet" data-tab="bottin">👥 Bottin des employés</button>
   </div>
@@ -179,6 +180,41 @@ thead th .funnel.actif{opacity:1;color:var(--or-doux);}
         <div class="barre"><input type="search" id="rech-ent" class="recherche" style="margin:0;flex:1;" placeholder="🔍 Rechercher un fournisseur, un numéro…"><span class="compteur" id="cpt-ent"></span></div>
         <div id="mount-ent"></div>
       </div>
+    </div>
+  </div>
+
+  <!-- ====================== ONGLET BILAN FOURNISSEURS ====================== -->
+  <div id="tab-bilan" class="tabpane">
+    <div class="sommaire">
+      <div class="kpi" style="background:linear-gradient(135deg,var(--graphite),var(--graphite2));border:none;">
+        <div class="l" style="color:var(--or-doux);" id="bf-kpi-global-l">Solde global à payer</div>
+        <div class="v" style="color:#fff;" id="bf-kpi-global">—</div>
+        <div style="font-size:11px;color:#9fb0c0;margin-top:3px;" id="bf-kpi-global-s"></div>
+      </div>
+      <div class="kpi">
+        <div class="l" id="bf-kpi-ent-l">🤝 Ententes — à payer</div>
+        <div class="v" style="color:var(--or);" id="bf-kpi-ent">—</div>
+        <div style="font-size:11px;color:var(--texte2);margin-top:3px;" id="bf-kpi-ent-s"></div>
+      </div>
+      <div class="kpi" style="border-left-color:var(--rouge);">
+        <div class="l" id="bf-kpi-hors-l">Fournisseurs (hors entente)</div>
+        <div class="v" style="color:var(--rouge);" id="bf-kpi-hors">—</div>
+        <div style="font-size:11px;color:var(--texte2);margin-top:3px;" id="bf-kpi-hors-s"></div>
+      </div>
+    </div>
+    <div class="carte">
+      <div class="carte-h" style="display:flex;justify-content:space-between;align-items:center;">
+        <span>📊 Bilan par fournisseur — hors entente</span>
+        <span class="compteur" id="bf-cpt-hors"></span>
+      </div>
+      <div class="tbl-scroll" id="mount-bilan-hors"></div>
+    </div>
+    <div class="carte">
+      <div class="carte-h" style="display:flex;justify-content:space-between;align-items:center;">
+        <span>🤝 Bilan fournisseurs — Ententes de paiement</span>
+        <span class="compteur" id="bf-cpt-ent"></span>
+      </div>
+      <div class="tbl-scroll" id="mount-bilan-ent"></div>
     </div>
   </div>
 
@@ -277,7 +313,7 @@ document.querySelectorAll('.onglet').forEach(function(b){
     document.querySelectorAll('.onglet').forEach(function(x){ x.classList.remove('actif'); });
     b.classList.add('actif');
     var t = b.dataset.tab;
-    ['fact','bottin','ec'].forEach(function(x){
+    ['fact','bilan','bottin','ec'].forEach(function(x){
       var p = document.getElementById('tab-'+x);
       if (p) p.classList.toggle('actif', x===t);
     });
@@ -585,6 +621,42 @@ function renderEtat(){
   document.getElementById('ec-conteneur').innerHTML=html;
 }
 
+/* ===== Bilan fournisseurs (agrégation par fournisseur, comme la page À payer) ===== */
+function bilanParFournisseur(facs){
+  var g={}, ordre=[];
+  facs.forEach(function(f){
+    var n=f.fournisseur||'—';
+    if(!g[n]){ g[n]={fournisseur:n, nb:0, montant:0, paye:0, reste:0}; ordre.push(n); }
+    g[n].nb++; g[n].montant+=Number(f.montant)||0; g[n].paye+=Number(f.paye)||0; g[n].reste+=Number(f.reste)||0;
+  });
+  return ordre.map(function(n){ return g[n]; }).sort(function(a,b){ return b.reste-a.reste; });
+}
+var COLS_BILAN=[
+ {k:'fournisseur',label:'Fournisseur',render:function(r){return '<span class="fourn">'+escapeHtmlP(r.fournisseur)+'</span>';}},
+ {k:'nb',label:'Factures',num:true,render:function(r){return r.nb;}},
+ {k:'montant',label:'Facturé',num:true,render:function(r){return arg2(r.montant);}},
+ {k:'paye',label:'Payé',num:true,render:function(r){return arg2(r.paye);}},
+ {k:'reste',label:'Reste à payer',num:true,render:function(r){return '<strong>'+arg2(r.reste)+'</strong>';}},
+];
+function renderBilan(){
+  var totGlobal=sumReste(FACTURES), totEnt=sumReste(entFact), totHors=sumReste(horsFact);
+  setTxt('bf-kpi-global', arg2(totGlobal));
+  setTxt('bf-kpi-global-l', 'Solde global à payer · '+FACTURES.length+' factures');
+  setTxt('bf-kpi-global-s', 'Facturé '+arg2(FACTURES.reduce(function(s,f){return s+f.montant;},0))+' · Payé '+arg2(FACTURES.reduce(function(s,f){return s+f.paye;},0)));
+  setTxt('bf-kpi-ent', arg2(totEnt));
+  setTxt('bf-kpi-ent-l', '🤝 Ententes — à payer · '+entFact.length);
+  setTxt('bf-kpi-ent-s', 'Facturé '+arg2(entFact.reduce(function(s,f){return s+f.montant;},0))+' · Payé '+arg2(entFact.reduce(function(s,f){return s+f.paye;},0)));
+  setTxt('bf-kpi-hors', arg2(totHors));
+  setTxt('bf-kpi-hors-l', 'Fournisseurs (hors entente) · '+horsFact.length);
+  setTxt('bf-kpi-hors-s', 'Facturé '+arg2(horsFact.reduce(function(s,f){return s+f.montant;},0))+' · Payé '+arg2(horsFact.reduce(function(s,f){return s+f.paye;},0)));
+  var bHors=bilanParFournisseur(horsFact), bEnt=bilanParFournisseur(entFact);
+  var mh=document.getElementById('mount-bilan-hors'), me=document.getElementById('mount-bilan-ent');
+  if(mh){ mh.innerHTML=''; if(bHors.length){ GrilleP(mh, bHors, COLS_BILAN, {sortK:null}); } else { mh.innerHTML='<div style="padding:20px;text-align:center;color:var(--texte2);">Aucune facture hors entente.</div>'; } }
+  if(me){ me.innerHTML=''; if(bEnt.length){ GrilleP(me, bEnt, COLS_BILAN, {sortK:null}); } else { me.innerHTML='<div style="padding:20px;text-align:center;color:var(--texte2);">Aucune facture avec entente.</div>'; } }
+  setTxt('bf-cpt-hors', bHors.length+' fournisseur(s) · Total '+arg2(totHors));
+  setTxt('bf-cpt-ent', bEnt.length+' fournisseur(s) · Total '+arg2(totEnt));
+}
+
 /* ===== Bottin ===== */
 var COLS_BOTTIN=[
  {k:'prenom',label:'Prénom',render:function(e){return escapeHtmlP(e.prenom||'—');}},
@@ -635,6 +707,7 @@ function initPortail(D){
   horsG = GrilleP(document.getElementById('mount-hors'), horsFact, COLS_FACT,
     {sortK:'reste', sortDir:-1, onCount:function(n,t){ setTxt('cpt-hors', n+' / '+t+' factures'); }});
   renderEntenteGroupes();
+  renderBilan();
   var rh=document.getElementById('rech-hors'); if(rh) rh.addEventListener('input',function(e){horsG.setSearch(e.target.value);});
   var re=document.getElementById('rech-ent'); if(re) re.addEventListener('input',function(e){entSearch=e.target.value; refreshEnt();});
   ['mount-hors','mount-ent'].forEach(function(mid){
