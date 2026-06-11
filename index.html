@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Portail directeur — Prestige Construction EA</title>
+<style>
+  :root { --or:#C98A2C; --graphite:#071018; --carte:#101e31; --texte:#e8e4dc; --gris:#8d99ab; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--graphite); color:var(--texte);
+         font:15px/1.5 system-ui, "Segoe UI", Arial, sans-serif; }
+  header { background:linear-gradient(135deg,#071018,#0e1c30); border-bottom:2px solid var(--or);
+           padding:18px 24px; }
+  header h1 { margin:0; font-size:20px; color:var(--or); letter-spacing:.5px; }
+  header p { margin:4px 0 0; color:var(--gris); font-size:13px; }
+  main { max-width:1100px; margin:0 auto; padding:20px 16px 60px; }
+  .totaux { display:flex; gap:14px; flex-wrap:wrap; margin-bottom:18px; }
+  .tot { background:var(--carte); border:1px solid #1d2c42; border-radius:10px; padding:12px 18px; }
+  .tot .v { font-size:20px; font-weight:700; color:var(--or); }
+  .tot .l { font-size:12px; color:var(--gris); }
+  h2 { font-size:16px; color:var(--or); border-bottom:1px solid #1d2c42; padding-bottom:6px; margin:26px 0 10px; }
+  .facture { background:var(--carte); border:1px solid #1d2c42; border-radius:10px;
+             padding:14px 16px; margin-bottom:12px; }
+  .lig1 { display:flex; flex-wrap:wrap; gap:8px 18px; align-items:baseline; }
+  .fournisseur { font-weight:700; font-size:16px; }
+  .badge { font-size:11px; padding:2px 8px; border-radius:20px; background:#1d2c42; color:var(--gris); }
+  .badge.entente { background:#27405f; color:#cfe0f5; }
+  .badge.retard { background:#5f2727; color:#f5cfcf; }
+  .nums { display:flex; gap:18px; flex-wrap:wrap; margin-top:6px; font-size:14px; }
+  .nums b { color:var(--or); }
+  .pdf { color:#9fc3ef; background:none; border:1px solid #2a3d59; font-weight:400;
+         padding:3px 10px; font-size:13px; border-radius:7px; cursor:pointer; }
+  .prop { margin-top:10px; border-top:1px dashed #233650; padding-top:10px; }
+  .prop-faite { color:#b9e0b9; font-size:14px; }
+  .prop-faite .quand { color:var(--gris); font-size:12px; }
+  form.proposer { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+  input, select { background:#0a1422; color:var(--texte); border:1px solid #2a3d59;
+           border-radius:7px; padding:7px 9px; font:inherit; font-size:14px; }
+  input[type=checkbox] { width:17px; height:17px; accent-color:var(--or); }
+  label.paie { display:flex; align-items:center; gap:6px; font-weight:600; }
+  button { background:var(--or); color:#071018; border:0; border-radius:7px; font-weight:700;
+           padding:8px 16px; cursor:pointer; font:inherit; }
+  button:hover { filter:brightness(1.1); }
+  button.annuler { background:#33455f; color:var(--texte); font-weight:400; padding:5px 12px; font-size:13px; }
+  .vide { color:var(--gris); padding:18px; text-align:center; }
+  footer { text-align:center; color:var(--gris); font-size:12px; padding:18px; }
+  .msg { position:fixed; top:14px; right:14px; background:#1d3a1d; color:#cfe9cf;
+         border:1px solid #2f5c2f; border-radius:8px; padding:10px 16px; display:none; z-index:9; }
+  .msg.err { background:#3a1d1d; color:#e9cfcf; border-color:#5c2f2f; }
+  #chargement { text-align:center; padding:60px 20px; color:var(--gris); }
+</style>
+</head>
+<body>
+<header>
+  <h1>Portail directeur — Prestige Construction EA</h1>
+  <p id="sous-titre">Chargement…</p>
+</header>
+<div class="msg" id="msg"></div>
+<main>
+  <div id="chargement">Chargement des factures…</div>
+  <div id="contenu" style="display:none">
+    <div class="totaux" id="totaux"></div>
+    <h2>Factures en entente</h2>
+    <div id="liste-entente"></div>
+    <h2>Factures hors entente</h2>
+    <div id="liste-hors"></div>
+  </div>
+</main>
+<footer>Prestige Construction EA — portail sécurisé. Aucune modification comptable n'est
+faite directement : le bureau révise et applique chaque proposition.</footer>
+<script>
+var CLE = new URLSearchParams(location.search).get('cle') || '';
+var APIKEY = 'sb_publishable_JnNmPUaGblAJgxIszwZhIg_vYpu612W';
+var BASE = 'https://fadrbbmagtsflwavztwm.supabase.co/rest/v1/rpc/';
+var FACTURES = [], COMPTES = [], PROPS = [];
+var AUJ = new Date().toISOString().slice(0,10);
+
+function esp(n){
+  if (n === null || n === undefined) return '';
+  var p = Number(n).toFixed(2).split('.');
+  return p[0].replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + '.' + p[1] + ' $';
+}
+function propPour(fid){
+  var r = null;
+  PROPS.forEach(function(p){ if (p.fid === fid) r = p; });
+  return r;
+}
+function htmlesc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
+function message(txt, err){
+  var m = document.getElementById('msg');
+  m.textContent = txt; m.className = 'msg' + (err ? ' err' : ''); m.style.display = 'block';
+  setTimeout(function(){ m.style.display = 'none'; }, 3500);
+}
+function rpc(nom, corps){
+  return fetch(BASE + nom, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'apikey': APIKEY,
+               'Authorization': 'Bearer ' + APIKEY },
+    body: JSON.stringify(corps)
+  }).then(function(r){ return r.json(); });
+}
+
+function rendre(){
+  var tEnt = 0, tHors = 0, nRetard = 0;
+  var dEnt = document.getElementById('liste-entente');
+  var dHors = document.getElementById('liste-hors');
+  dEnt.innerHTML = ''; dHors.innerHTML = '';
+  FACTURES.forEach(function(f){
+    var retard = f.date_echeance && f.date_echeance < AUJ && f.reste > 0;
+    if (retard) nRetard++;
+    if (f.en_entente) tEnt += Number(f.reste||0); else tHors += Number(f.reste||0);
+    var p = propPour(f.fid);
+    var h = '<div class="facture"><div class="lig1">'
+      + '<span class="fournisseur">' + htmlesc(f.fournisseur) + '</span>'
+      + '<span class="badge">No ' + htmlesc(f.no_facture || '—') + '</span>'
+      + (f.en_entente ? '<span class="badge entente">Entente</span>' : '')
+      + (retard ? '<span class="badge retard">En retard</span>' : '')
+      + (f.a_pdf ? ' <button class="pdf" onclick="voirPdf(' + f.fid + ')">Voir la facture (PDF)</button>' : '')
+      + '</div><div class="nums">'
+      + '<span>Échéance : <b>' + (f.date_echeance || '—') + '</b></span>'
+      + '<span>Montant : ' + esp(f.montant) + '</span>'
+      + '<span>Payé : ' + esp(f.paye) + '</span>'
+      + '<span>Reste : <b>' + esp(f.reste) + '</b></span>'
+      + '</div><div class="prop">';
+    if (p) {
+      h += '<div class="prop-faite">Proposition envoyée'
+        + (p.a_payer ? ' — « je paie »' : '')
+        + (p.compte ? ' · compte : ' + htmlesc(p.compte) : '')
+        + (p.montant ? ' · ' + esp(p.montant) : '')
+        + (p.date_paiement ? ' · le ' + p.date_paiement : '')
+        + (p.commentaire ? '<br>Commentaire : ' + htmlesc(p.commentaire) : '')
+        + ' <span class="quand">(' + p.cree_le + ')</span> ';
+      if (p.statut === 'EN_ATTENTE') {
+        h += '<button class="annuler" onclick="annuler(' + f.fid + ')">Annuler</button>';
+      } else {
+        h += '<span class="quand">— reçue au bureau</span>';
+      }
+      h += '</div>';
+    } else {
+      h += '<form class="proposer" onsubmit="return proposer(event,' + f.fid + ')">'
+        + '<label class="paie"><input type="checkbox" name="a_payer" checked> Je paie</label>'
+        + '<select name="compte"><option value="">Compte…</option>'
+        + COMPTES.map(function(c){ return '<option>' + htmlesc(c) + '</option>'; }).join('')
+        + '</select>'
+        + '<input name="montant" size="10" value="' + Number(f.reste||0).toFixed(2) + '" title="Montant">'
+        + '<input type="date" name="date_paiement" value="' + AUJ + '">'
+        + '<input name="commentaire" placeholder="Commentaire (optionnel)" style="flex:1;min-width:160px">'
+        + '<button>Envoyer</button></form>';
+    }
+    h += '</div></div>';
+    (f.en_entente ? dEnt : dHors).insertAdjacentHTML('beforeend', h);
+  });
+  if (!dEnt.children.length) dEnt.innerHTML = '<div class="vide">Aucune facture en entente à payer.</div>';
+  if (!dHors.children.length) dHors.innerHTML = '<div class="vide">Aucune facture hors entente à payer.</div>';
+  document.getElementById('totaux').innerHTML =
+      '<div class="tot"><div class="v">' + esp(tEnt + tHors) + '</div><div class="l">Total à payer</div></div>'
+    + '<div class="tot"><div class="v">' + esp(tEnt) + '</div><div class="l">En entente</div></div>'
+    + '<div class="tot"><div class="v">' + esp(tHors) + '</div><div class="l">Hors entente</div></div>'
+    + '<div class="tot"><div class="v">' + nRetard + '</div><div class="l">En retard</div></div>';
+}
+
+function charger(){
+  rpc('portail_donnees', { cle: CLE }).then(function(r){
+    if (!r || !r.ok) {
+      document.getElementById('chargement').textContent =
+        (r && r.erreur === 'Accès refusé')
+          ? 'Accès refusé — lien invalide. Communiquez avec le bureau.'
+          : 'Erreur de chargement — réessayez plus tard.';
+      return;
+    }
+    FACTURES = r.factures || []; COMPTES = r.comptes || []; PROPS = r.propositions || [];
+    document.getElementById('sous-titre').textContent =
+      'Factures à payer · Données à jour au ' + (r.sync || '—')
+      + ' · Vos propositions sont transmises au bureau pour application.';
+    document.getElementById('chargement').style.display = 'none';
+    document.getElementById('contenu').style.display = 'block';
+    rendre();
+  }).catch(function(){
+    document.getElementById('chargement').textContent = 'Erreur réseau — vérifiez votre connexion.';
+  });
+}
+
+function proposer(ev, fid){
+  ev.preventDefault();
+  var f = ev.target;
+  var montant = (f.montant.value || '').replace(/[\s ]/g,'').replace(',', '.');
+  rpc('portail_proposer', {
+    cle: CLE, p_fid: fid,
+    p_a_payer: f.a_payer.checked,
+    p_compte: f.compte.value || null,
+    p_montant: montant ? Number(montant) : null,
+    p_date_paiement: f.date_paiement.value || null,
+    p_commentaire: f.commentaire.value || null
+  }).then(function(r){
+    if (r && r.ok) { message('Proposition envoyée au bureau.'); setTimeout(charger, 700); }
+    else message((r && r.erreur) || 'Erreur — réessayez.', true);
+  }).catch(function(){ message('Erreur réseau — réessayez.', true); });
+  return false;
+}
+function annuler(fid){
+  if (!confirm('Annuler votre proposition pour cette facture ?')) return;
+  rpc('portail_annuler', { cle: CLE, p_fid: fid }).then(function(r){
+    if (r && r.ok) { message('Proposition annulée.'); setTimeout(charger, 500); }
+    else message((r && r.erreur) || 'Erreur — réessayez.', true);
+  });
+}
+function voirPdf(fid){
+  message('Ouverture du PDF…');
+  rpc('portail_pdf_b64', { cle: CLE, p_fid: fid }).then(function(r){
+    if (!r || !r.ok) { message((r && r.erreur) || 'PDF non disponible.', true); return; }
+    var bin = atob(r.b64), n = bin.length, octets = new Uint8Array(n);
+    for (var i = 0; i < n; i++) octets[i] = bin.charCodeAt(i);
+    var url = URL.createObjectURL(new Blob([octets], { type: 'application/pdf' }));
+    window.open(url, '_blank');
+  }).catch(function(){ message('Erreur réseau — réessayez.', true); });
+}
+charger();
+</script>
+</body>
+</html>
