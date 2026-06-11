@@ -1,220 +1,679 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Portail directeur — Prestige Construction EA</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  :root { --or:#C98A2C; --graphite:#071018; --carte:#101e31; --texte:#e8e4dc; --gris:#8d99ab; }
-  * { box-sizing:border-box; }
-  body { margin:0; background:var(--graphite); color:var(--texte);
-         font:15px/1.5 system-ui, "Segoe UI", Arial, sans-serif; }
-  header { background:linear-gradient(135deg,#071018,#0e1c30); border-bottom:2px solid var(--or);
-           padding:18px 24px; }
-  header h1 { margin:0; font-size:20px; color:var(--or); letter-spacing:.5px; }
-  header p { margin:4px 0 0; color:var(--gris); font-size:13px; }
-  main { max-width:1100px; margin:0 auto; padding:20px 16px 60px; }
-  .totaux { display:flex; gap:14px; flex-wrap:wrap; margin-bottom:18px; }
-  .tot { background:var(--carte); border:1px solid #1d2c42; border-radius:10px; padding:12px 18px; }
-  .tot .v { font-size:20px; font-weight:700; color:var(--or); }
-  .tot .l { font-size:12px; color:var(--gris); }
-  h2 { font-size:16px; color:var(--or); border-bottom:1px solid #1d2c42; padding-bottom:6px; margin:26px 0 10px; }
-  .facture { background:var(--carte); border:1px solid #1d2c42; border-radius:10px;
-             padding:14px 16px; margin-bottom:12px; }
-  .lig1 { display:flex; flex-wrap:wrap; gap:8px 18px; align-items:baseline; }
-  .fournisseur { font-weight:700; font-size:16px; }
-  .badge { font-size:11px; padding:2px 8px; border-radius:20px; background:#1d2c42; color:var(--gris); }
-  .badge.entente { background:#27405f; color:#cfe0f5; }
-  .badge.retard { background:#5f2727; color:#f5cfcf; }
-  .nums { display:flex; gap:18px; flex-wrap:wrap; margin-top:6px; font-size:14px; }
-  .nums b { color:var(--or); }
-  .pdf { color:#9fc3ef; background:none; border:1px solid #2a3d59; font-weight:400;
-         padding:3px 10px; font-size:13px; border-radius:7px; cursor:pointer; }
-  .prop { margin-top:10px; border-top:1px dashed #233650; padding-top:10px; }
-  .prop-faite { color:#b9e0b9; font-size:14px; }
-  .prop-faite .quand { color:var(--gris); font-size:12px; }
-  form.proposer { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
-  input, select { background:#0a1422; color:var(--texte); border:1px solid #2a3d59;
-           border-radius:7px; padding:7px 9px; font:inherit; font-size:14px; }
-  input[type=checkbox] { width:17px; height:17px; accent-color:var(--or); }
-  label.paie { display:flex; align-items:center; gap:6px; font-weight:600; }
-  button { background:var(--or); color:#071018; border:0; border-radius:7px; font-weight:700;
-           padding:8px 16px; cursor:pointer; font:inherit; }
-  button:hover { filter:brightness(1.1); }
-  button.annuler { background:#33455f; color:var(--texte); font-weight:400; padding:5px 12px; font-size:13px; }
-  .vide { color:var(--gris); padding:18px; text-align:center; }
-  footer { text-align:center; color:var(--gris); font-size:12px; padding:18px; }
-  .msg { position:fixed; top:14px; right:14px; background:#1d3a1d; color:#cfe9cf;
-         border:1px solid #2f5c2f; border-radius:8px; padding:10px 16px; display:none; z-index:9; }
-  .msg.err { background:#3a1d1d; color:#e9cfcf; border-color:#5c2f2f; }
-  #chargement { text-align:center; padding:60px 20px; color:var(--gris); }
+:root{--fond:#F4F6F9;--blanc:#fff;--texte:#0F172A;--texte2:#64748B;--bordure:#E5E7EB;--graphite:#071018;--graphite2:#111827;--or:#C98A2C;--or-doux:#F3D39A;--or-fond:#FBF3E4;--vert:#16A34A;--vert-fond:#E8F7EE;--vert-tx:#136B36;--rouge:#DC2626;--ombre:0 8px 24px rgba(15,23,42,.06);}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter','Segoe UI',system-ui,sans-serif;background:var(--fond);color:var(--texte);line-height:1.45;-webkit-font-smoothing:antialiased;}
+.wrap{max-width:1320px;margin:0 auto;padding:26px 20px 70px;}
+.entete{background:linear-gradient(135deg,var(--graphite),var(--graphite2));color:#fff;border-radius:18px;padding:24px 28px;box-shadow:0 18px 40px rgba(15,23,42,.18);}
+.entete .marque{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--or-doux);font-weight:600;}
+.entete h1{font-size:23px;font-weight:800;margin-top:6px;}
+.entete .meta{margin-top:9px;font-size:12.5px;color:#9fb0c0;}
+.onglets{display:flex;gap:8px;margin-top:18px;border-bottom:2px solid var(--bordure);flex-wrap:wrap;}
+.onglet{padding:11px 20px;border:none;background:none;font-family:inherit;font-size:14px;font-weight:700;color:var(--texte2);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;}
+.onglet:hover{color:var(--texte);}
+.onglet.actif{color:var(--texte);border-bottom-color:var(--or);}
+.bandeau{margin-top:16px;background:var(--or-fond);border:1px solid #f0d9a8;color:#8A5E1B;border-radius:12px;padding:13px 18px;font-size:13.5px;}
+.sommaire{display:flex;gap:14px;flex-wrap:wrap;margin-top:18px;}
+.kpi{flex:1 1 200px;background:var(--blanc);border:1px solid var(--bordure);border-radius:14px;padding:15px 18px;box-shadow:var(--ombre);border-left:5px solid var(--or);}
+.kpi .l{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--texte2);font-weight:600;}
+.kpi .v{font-size:22px;font-weight:800;margin-top:3px;}
+.recherche{width:100%;margin:20px 0 8px;padding:11px 15px;border:1px solid var(--bordure);border-radius:10px;font-size:15px;font-family:inherit;}
+.recherche:focus{outline:none;border-color:var(--or);box-shadow:0 0 0 3px rgba(201,138,44,.15);}
+.badge{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:700;}
+.b-envoye{background:var(--vert-fond);color:var(--vert-tx);}
+.b-retard{background:#FDECEC;color:#A11A1A;}
+.b-partiel{background:#FEF3E2;color:#92560A;}
+.btn{padding:10px 20px;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;}
+.btn-or{background:var(--graphite);color:#fff;}
+.btn-or:hover{background:var(--graphite2);}
+.msg{font-size:13px;font-weight:600;}
+.msg.ok{color:var(--vert-tx);}
+.msg.err{color:var(--rouge);}
+.carte{background:var(--blanc);border:1px solid var(--bordure);border-radius:14px;box-shadow:var(--ombre);overflow:hidden;margin-top:14px;}
+.carte-h{padding:14px 18px;border-bottom:1px solid var(--bordure);font-weight:700;font-size:14px;}
+.carte-h.carte-pliable{display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none;}
+.carte-h.carte-pliable:hover{background:#fcfcfd;}
+.fl-carte{color:var(--or);font-weight:700;font-size:16px;}
+table{width:100%;border-collapse:collapse;font-size:13.5px;}
+thead th{background:var(--graphite);color:#fff;text-align:left;padding:10px 14px;font-size:11.5px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap;}
+thead th.num{text-align:right;}
+tbody td{padding:9px 14px;border-bottom:1px solid #eef1f5;vertical-align:middle;}
+tbody tr:nth-child(odd) td{background:#fafbfc;}
+.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;}
+.fourn{font-weight:600;}
+.tbl-scroll{overflow-x:auto;}
+.pied{margin-top:26px;text-align:center;color:var(--texte2);font-size:12px;}
+.tabpane{display:none;}
+.tabpane.actif{display:block;}
+body.avec-pdf .wrap{max-width:none;margin:0;padding-right:calc(50vw + 24px);}
+@media(max-width:900px){ #panneau-pdf{width:100vw!important;} body.avec-pdf .wrap{display:none;} }
+.ec-bloc tfoot td{background:#fff;color:var(--texte);border-top:2px solid #e0e0e0;font-weight:800;}
+.ec-bloc .tbl-scroll{margin:12px 18px 18px;border:1px solid var(--bordure);border-radius:12px;overflow:hidden;}
+.ec-bloc table{width:100%;table-layout:fixed;}
+.ec-bloc th,.ec-bloc td{overflow-wrap:anywhere;padding:9px 12px;}
+.bulle{background:var(--blanc);border:1px solid var(--bordure);border-radius:16px;box-shadow:var(--ombre);overflow:hidden;margin:14px 0 18px;}
+.bulle-h{display:flex;align-items:center;gap:14px;padding:16px 20px;cursor:pointer;user-select:none;}
+.bulle-h:hover{background:#fcfcfd;}
+.bulle-h .b-t{font-weight:800;font-size:15px;}
+.bulle-h .b-meta{font-size:12.5px;color:var(--texte2);}
+.bulle-h .b-sol{margin-left:auto;font-weight:800;font-size:16px;}
+.bulle-h .b-sol.rouge{color:var(--rouge);} .bulle-h .b-sol.or{color:var(--or);}
+.bulle-h .b-fl{font-size:18px;color:var(--or);width:22px;text-align:center;font-weight:700;}
+.bulle-corps{padding:0 18px 18px;}
+.barre{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:14px 0;}
+#mount-hors{border:1px solid var(--bordure);border-radius:12px;overflow:hidden;}
+#mount-hors table{width:100%;table-layout:fixed;}
+#mount-hors th,#mount-hors td{overflow-wrap:anywhere;padding:9px 10px;}
+#mount-hors td:nth-child(1),#mount-hors th:nth-child(1){width:6%;text-align:center;}
+#mount-hors td:nth-child(2),#mount-hors th:nth-child(2){width:10%;}
+#mount-hors td:nth-child(3),#mount-hors th:nth-child(3){width:10%;}
+#mount-hors td:nth-child(4),#mount-hors th:nth-child(4){width:27%;}
+#mount-hors td:nth-child(5),#mount-hors th:nth-child(5){width:12%;}
+#mount-hors td:nth-child(6),#mount-hors th:nth-child(6){width:12%;}
+#mount-hors td:nth-child(7),#mount-hors th:nth-child(7){width:16%;}
+#mount-hors td:nth-child(8),#mount-hors th:nth-child(8){width:7%;text-align:center;}
+.grp-ent{border:1px solid var(--bordure);border-radius:12px;overflow:hidden;margin-top:12px;}
+.grp-ent-h{display:flex;align-items:center;gap:12px;padding:11px 16px;cursor:pointer;user-select:none;background:var(--or-fond);}
+.grp-ent-h:hover{filter:brightness(.99);}
+.grp-ent-h .grp-t{font-weight:800;font-size:14px;}
+.grp-ent-h .grp-r{margin-left:auto;display:flex;align-items:center;gap:16px;flex-wrap:wrap;justify-content:flex-end;}
+.grp-ent-h .grp-meta{font-size:12px;color:var(--texte2);}
+.grp-ent-h .grp-tot{font-weight:800;color:var(--rouge);font-size:14px;}
+.grp-ent-h .grp-fl{color:var(--or);width:16px;text-align:center;font-weight:700;}
+.grp-ent-corps table{width:100%;table-layout:fixed;border-collapse:collapse;}
+.grp-ent-corps thead th{background:#243140;color:#fff;text-align:left;padding:9px 10px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.3px;}
+.grp-ent-corps thead th.num{text-align:right;}
+.grp-ent-corps td{padding:9px 10px;border-bottom:1px solid #eef1f5;overflow-wrap:anywhere;}
+#modal-paie{display:none;position:fixed;inset:0;background:rgba(7,16,24,.5);z-index:8000;}
+#modal-paie .boite{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:min(520px,94vw);max-height:92vh;overflow:auto;background:#fff;border-radius:16px;box-shadow:0 20px 50px rgba(0,0,0,.35);}
+#modal-paie .tete{background:linear-gradient(135deg,#071018,#111827);color:#fff;padding:18px 22px;}
+.mono{font-variant-numeric:tabular-nums;white-space:nowrap;}
+.compteur{font-size:12.5px;color:var(--texte2);}
+.champ label{display:block;font-size:11.5px;color:var(--texte2);font-weight:600;margin-bottom:4px;}
+.champ input,.champ select{width:100%;padding:9px 11px;border:1px solid var(--bordure);border-radius:9px;font-size:14px;font-family:inherit;background:#fff;}
+.champ input:focus,.champ select:focus{outline:none;border-color:var(--or);box-shadow:0 0 0 3px rgba(201,138,44,.13);}
+.case{display:flex;align-items:center;gap:10px;background:var(--or-fond);border:1px solid #f0d9a8;border-radius:10px;padding:11px 14px;font-weight:700;cursor:pointer;}
+.case input{width:20px;height:20px;cursor:pointer;}
+#mount-bottin{border:1px solid var(--bordure);border-radius:12px;overflow:hidden;}
+#mount-bottin table{width:100%;table-layout:fixed;}
+#mount-bottin th,#mount-bottin td{padding:9px 12px;overflow-wrap:anywhere;}
+#mount-bottin td a{overflow-wrap:anywhere;}
+#mount-bottin th:nth-child(1),#mount-bottin td:nth-child(1){width:11%;}
+#mount-bottin th:nth-child(2),#mount-bottin td:nth-child(2){width:14%;}
+#mount-bottin th:nth-child(3),#mount-bottin td:nth-child(3){width:26%;}
+#mount-bottin th:nth-child(4),#mount-bottin td:nth-child(4){width:13%;}
+#mount-bottin th:nth-child(5),#mount-bottin td:nth-child(5){width:24%;}
+#mount-bottin th:nth-child(6),#mount-bottin td:nth-child(6){width:12%;}
+thead th .lbl{cursor:pointer;user-select:none;}
+thead th .fl{opacity:.4;font-size:10px;margin-left:4px;}
+thead th .funnel{cursor:pointer;opacity:.5;font-size:11px;margin-left:5px;}
+thead th .funnel:hover{opacity:1;}
+thead th .funnel.actif{opacity:1;color:var(--or-doux);}
+#funnel-menu{display:none;position:fixed;background:#fff;border:1px solid #ccc;border-radius:10px;box-shadow:0 12px 34px rgba(0,0,0,.22);padding:10px;z-index:9999;min-width:230px;max-width:300px;font-size:13px;color:var(--texte);}
+#funnel-menu .fm-rech input{width:100%;padding:6px 8px;border:1px solid var(--bordure);border-radius:6px;margin-bottom:6px;font-family:inherit;}
+#funnel-menu .fm-all{display:flex;gap:7px;align-items:center;font-weight:700;padding:4px 0;border-bottom:1px solid #eee;cursor:pointer;}
+#funnel-menu .fm-list{max-height:240px;overflow:auto;margin-top:6px;}
+#funnel-menu .fm-list label{display:flex;gap:7px;align-items:center;padding:3px 0;cursor:pointer;}
+#funnel-menu .cnt{color:#9aa3ad;}
+#funnel-menu .fm-act{margin-top:8px;text-align:right;border-top:1px solid #eee;padding-top:8px;}
+#funnel-menu .fm-eff{padding:5px 10px;border:1px solid var(--bordure);background:#f8f9fa;border-radius:6px;cursor:pointer;font-size:12px;font-family:inherit;}
+#chargement-page{padding:60px 20px;text-align:center;color:var(--texte2);font-size:15px;}
 </style>
 </head>
 <body>
-<header>
-  <h1>Portail directeur — Prestige Construction EA</h1>
-  <p id="sous-titre">Chargement…</p>
-</header>
-<div class="msg" id="msg"></div>
-<main>
-  <div id="chargement">Chargement des factures…</div>
-  <div id="contenu" style="display:none">
-    <div class="totaux" id="totaux"></div>
-    <h2>Factures en entente</h2>
-    <div id="liste-entente"></div>
-    <h2>Factures hors entente</h2>
-    <div id="liste-hors"></div>
+<div class="wrap">
+  <div class="entete">
+    <div class="marque">Prestige Construction EA — Portail directeur</div>
+    <h1>Sous-traitants &amp; employés</h1>
+    <div class="meta" id="hdr-meta">Excavation Anthony Inc. (NEQ 1178440104) · Chargement… · Consultation — vos paiements et commentaires sont transmis au comptable pour validation.</div>
   </div>
-</main>
-<footer>Prestige Construction EA — portail sécurisé. Aucune modification comptable n'est
-faite directement : le bureau révise et applique chaque proposition.</footer>
+
+  <div id="chargement-page">Chargement des données…</div>
+
+  <div id="contenu-page" style="display:none;">
+  <div class="onglets">
+    <button class="onglet actif" data-tab="fact">💵 Factures à payer</button>
+    <button class="onglet" data-tab="ec">📒 État de compte fournisseurs</button>
+    <button class="onglet" data-tab="bottin">👥 Bottin des employés</button>
+  </div>
+
+  <!-- ====================== ONGLET FACTURES ====================== -->
+  <div id="tab-fact" class="tabpane actif">
+    <div class="bandeau">
+      ℹ️ Cochez la case <strong>« Payer »</strong> d'une facture pour proposer un paiement (compte, montant, date) ou laisser un commentaire. Rien n'est modifié directement : le comptable reçoit une alerte et applique après vérification.
+    </div>
+    <div class="sommaire">
+      <div class="kpi"><div class="l">Factures à payer</div><div class="v" id="kpi-nb">—</div></div>
+      <div class="kpi" style="border-left-color:var(--rouge);"><div class="l">Reste à payer (total)</div><div class="v" style="color:var(--rouge)" id="kpi-reste">—</div></div>
+    </div>
+
+    <div id="barre-selection" style="display:none;position:sticky;top:8px;z-index:50;background:linear-gradient(135deg,#071018,#111827);color:#fff;border-radius:12px;padding:12px 18px;margin:14px 0;align-items:center;gap:14px;flex-wrap:wrap;box-shadow:0 10px 28px rgba(7,16,24,.3);">
+      <span><strong id="sel-nb">0</strong> facture(s) cochée(s) · reste à payer <strong id="sel-total" style="color:var(--or-doux);">0,00 $</strong></span>
+      <button type="button" class="btn btn-or" style="margin-left:auto;" onclick="ouvrirPaieMulti()">📨 Proposer le paiement</button>
+      <button type="button" class="btn" style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,.3);" onclick="viderSelection()">Tout décocher</button>
+    </div>
+
+    <div class="bulle">
+      <div class="bulle-h" onclick="basculerBulle('hors')">
+        <span class="b-t">Sans entente</span><span class="b-meta" id="hb-meta"></span>
+        <span class="b-sol rouge" id="hb-sol"></span><span class="b-fl" id="fl-hors">▾</span>
+      </div>
+      <div class="bulle-corps" id="bc-hors">
+        <div class="barre"><input type="search" id="rech-hors" class="recherche" style="margin:0;flex:1;" placeholder="🔍 Rechercher un fournisseur, un numéro…"><span class="compteur" id="cpt-hors"></span></div>
+        <div id="mount-hors"></div>
+      </div>
+    </div>
+
+    <div class="bulle">
+      <div class="bulle-h" onclick="basculerBulle('ent')">
+        <span class="b-t">🤝 Avec entente de paiement</span><span class="b-meta" id="eb-meta"></span>
+        <span class="b-sol or" id="eb-sol"></span><span class="b-fl" id="fl-ent">▾</span>
+      </div>
+      <div class="bulle-corps" id="bc-ent">
+        <div class="barre"><input type="search" id="rech-ent" class="recherche" style="margin:0;flex:1;" placeholder="🔍 Rechercher un fournisseur, un numéro…"><span class="compteur" id="cpt-ent"></span></div>
+        <div id="mount-ent"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================== ONGLET BOTTIN ====================== -->
+  <div id="tab-bottin" class="tabpane">
+    <div class="carte">
+      <div class="carte-h" style="display:flex;justify-content:space-between;align-items:center;">
+        <span id="bot-titre">👥 Employés — lecture seule</span>
+        <span class="compteur" id="bot-compteur"></span>
+      </div>
+      <div style="padding:14px 18px 0;">
+        <input type="search" id="rech-bot" class="recherche" style="margin:0 0 14px;" placeholder="🔍 Rechercher un nom, un métier…">
+      </div>
+      <div id="mount-bottin" style="margin:0 18px 18px;"></div>
+    </div>
+  </div>
+
+  <!-- ====================== ONGLET ÉTAT DE COMPTE ====================== -->
+  <div id="tab-ec" class="tabpane">
+    <div class="sommaire">
+      <div class="kpi"><div class="l">Fournisseurs</div><div class="v" id="ec-kpi-nb">—</div></div>
+      <div class="kpi" style="border-left-color:var(--rouge);"><div class="l">Solde total dû</div><div class="v" style="color:var(--rouge)" id="ec-kpi-solde">—</div></div>
+    </div>
+    <div class="carte" style="padding:16px 18px;margin-top:14px;">
+      <label style="font-weight:700;font-size:14px;display:block;margin-bottom:8px;">Choisir un sous-traitant</label>
+      <select id="ec-select" class="recherche" style="margin:0;" onchange="montrerEc(this.value)">
+        <option value="">— Sélectionner un sous-traitant —</option>
+      </select>
+    </div>
+    <div id="ec-vide" class="carte"><div style="padding:30px;text-align:center;color:var(--texte2)">📄 Sélectionnez un sous-traitant pour afficher son état de compte.</div></div>
+    <div id="ec-conteneur"></div>
+  </div>
+
+  <div class="pied">Prestige Construction EA · Portail directeur (lecture seule) · Les actions sont transmises au comptable pour validation.</div>
+  </div>
+</div>
+
+<div id="modal-paie">
+  <div class="boite">
+    <div class="tete">
+      <div style="font-size:12px;letter-spacing:1px;text-transform:uppercase;color:#F3D39A;font-weight:600;">Proposer un paiement</div>
+      <div id="mp-titre" style="font-size:18px;font-weight:800;margin-top:4px;">—</div>
+      <div id="mp-sous" style="font-size:12.5px;color:#9fb0c0;margin-top:3px;"></div>
+    </div>
+    <div style="padding:20px 22px;">
+      <label class="case" style="margin-bottom:14px;"><input type="checkbox" id="mp-payer" checked> 💵 Je paie cette facture</label>
+      <div class="champ" style="margin-bottom:12px;">
+        <label>Compte / mode de paiement (d'où sort l'argent)</label>
+        <select id="mp-compte" onchange="mpAutre()"></select>
+        <input type="text" id="mp-compte-autre" placeholder="Précisez le compte ou le mode de paiement" style="display:none;margin-top:8px;width:100%;padding:9px 11px;border:1px solid var(--bordure);border-radius:9px;font-size:14px;font-family:inherit;">
+      </div>
+      <div id="mp-multi-note" style="display:none;background:var(--or-fond);border:1px solid #f0d9a8;color:#8A5E1B;border-radius:8px;padding:9px 12px;font-size:12.5px;margin-bottom:12px;">Le <strong>reste à payer de chaque facture</strong> sélectionnée sera proposé.</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="champ" id="mp-montant-bloc"><label>Montant ($)</label><input type="text" id="mp-montant" placeholder="0.00"></div>
+        <div class="champ"><label>Date du paiement</label><input type="date" id="mp-date"></div>
+      </div>
+      <div class="champ" style="margin-top:12px;">
+        <label>Commentaire pour le comptable</label>
+        <textarea id="mp-comment" style="width:100%;min-height:60px;padding:10px 12px;border:1px solid var(--bordure);border-radius:10px;font-size:14px;font-family:inherit;resize:vertical;" placeholder="Ex. : payer en deux versements, vérifier le montant…"></textarea>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:18px;align-items:center;flex-wrap:wrap;">
+        <button class="btn btn-or" onclick="mpEnvoyer()">📨 Envoyer au comptable</button>
+        <button class="btn" style="background:#fff;border:1px solid var(--bordure);" onclick="mpFermer()">Annuler</button>
+        <span class="msg" id="mp-msg"></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="panneau-pdf" style="display:none;position:fixed;top:0;right:0;width:50vw;height:100vh;background:#fff;box-shadow:-12px 0 40px rgba(0,0,0,.2);z-index:9000;flex-direction:column;border-left:1px solid var(--bordure);">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:linear-gradient(135deg,#071018,#111827);color:#fff;">
+    <span id="pdf-titre" style="font-weight:700;font-size:14px;">Facture</span>
+    <button type="button" onclick="fermerPdf()" style="background:none;border:none;color:#fff;font-size:24px;cursor:pointer;line-height:1;">✕</button>
+  </div>
+  <iframe id="pdf-frame" src="" title="Facture" style="flex:1;border:none;width:100%;background:#525659;"></iframe>
+</div>
+
 <script>
+/* ===== Connexion au serveur (Supabase, Canada) ===== */
 var CLE = new URLSearchParams(location.search).get('cle') || '';
 var APIKEY = 'sb_publishable_JnNmPUaGblAJgxIszwZhIg_vYpu612W';
 var BASE = 'https://fadrbbmagtsflwavztwm.supabase.co/rest/v1/rpc/';
-var FACTURES = [], COMPTES = [], PROPS = [];
-var AUJ = new Date().toISOString().slice(0,10);
-
-function esp(n){
-  if (n === null || n === undefined) return '';
-  var p = Number(n).toFixed(2).split('.');
-  return p[0].replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + '.' + p[1] + ' $';
-}
-function propPour(fid){
-  var r = null;
-  PROPS.forEach(function(p){ if (p.fid === fid) r = p; });
-  return r;
-}
-function htmlesc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
-function message(txt, err){
-  var m = document.getElementById('msg');
-  m.textContent = txt; m.className = 'msg' + (err ? ' err' : ''); m.style.display = 'block';
-  setTimeout(function(){ m.style.display = 'none'; }, 3500);
-}
 function rpc(nom, corps){
   return fetch(BASE + nom, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'apikey': APIKEY,
-               'Authorization': 'Bearer ' + APIKEY },
+    method:'POST',
+    headers:{'Content-Type':'application/json','apikey':APIKEY,'Authorization':'Bearer '+APIKEY},
     body: JSON.stringify(corps)
   }).then(function(r){ return r.json(); });
 }
 
-function rendre(){
-  var tEnt = 0, tHors = 0, nRetard = 0;
-  var dEnt = document.getElementById('liste-entente');
-  var dHors = document.getElementById('liste-hors');
-  dEnt.innerHTML = ''; dHors.innerHTML = '';
-  FACTURES.forEach(function(f){
-    var retard = f.date_echeance && f.date_echeance < AUJ && f.reste > 0;
-    if (retard) nRetard++;
-    if (f.en_entente) tEnt += Number(f.reste||0); else tHors += Number(f.reste||0);
-    var p = propPour(f.fid);
-    var h = '<div class="facture"><div class="lig1">'
-      + '<span class="fournisseur">' + htmlesc(f.fournisseur) + '</span>'
-      + '<span class="badge">No ' + htmlesc(f.no_facture || '—') + '</span>'
-      + (f.en_entente ? '<span class="badge entente">Entente</span>' : '')
-      + (retard ? '<span class="badge retard">En retard</span>' : '')
-      + (f.a_pdf ? ' <button class="pdf" onclick="voirPdf(' + f.fid + ')">Voir la facture (PDF)</button>' : '')
-      + '</div><div class="nums">'
-      + '<span>Échéance : <b>' + (f.date_echeance || '—') + '</b></span>'
-      + '<span>Montant : ' + esp(f.montant) + '</span>'
-      + '<span>Payé : ' + esp(f.paye) + '</span>'
-      + '<span>Reste : <b>' + esp(f.reste) + '</b></span>'
-      + '</div><div class="prop">';
-    if (p) {
-      h += '<div class="prop-faite">Proposition envoyée'
-        + (p.a_payer ? ' — « je paie »' : '')
-        + (p.compte ? ' · compte : ' + htmlesc(p.compte) : '')
-        + (p.montant ? ' · ' + esp(p.montant) : '')
-        + (p.date_paiement ? ' · le ' + p.date_paiement : '')
-        + (p.commentaire ? '<br>Commentaire : ' + htmlesc(p.commentaire) : '')
-        + ' <span class="quand">(' + p.cree_le + ')</span> ';
-      if (p.statut === 'EN_ATTENTE') {
-        h += '<button class="annuler" onclick="annuler(' + f.fid + ')">Annuler</button>';
+var EMPLOYES=[], FACTURES=[], COMPTES=[], ETAT=[], TODAY='';
+
+/* Onglets */
+document.querySelectorAll('.onglet').forEach(function(b){
+  b.onclick = function(){
+    document.querySelectorAll('.onglet').forEach(function(x){ x.classList.remove('actif'); });
+    b.classList.add('actif');
+    var t = b.dataset.tab;
+    ['fact','bottin','ec'].forEach(function(x){
+      var p = document.getElementById('tab-'+x);
+      if (p) p.classList.toggle('actif', x===t);
+    });
+  };
+});
+function basculerCarte(h){
+  var c = h.nextElementSibling;
+  if(!c) return;
+  var ferme = c.style.display !== 'none';
+  c.style.display = ferme ? 'none' : '';
+  var fl = h.querySelector('.fl-carte');
+  if(fl) fl.textContent = ferme ? '▸' : '▾';
+}
+function montrerEc(id){
+  var blocs = document.querySelectorAll('.ec-bloc');
+  for(var i=0;i<blocs.length;i++){ blocs[i].style.display='none'; }
+  var vide = document.getElementById('ec-vide');
+  if(id){ var el=document.getElementById(id); if(el) el.style.display='block'; if(vide) vide.style.display='none'; }
+  else { if(vide) vide.style.display='block'; }
+}
+var MENU_F;
+function ensureMenuF(){ if(MENU_F) return; MENU_F=document.createElement('div'); MENU_F.id='funnel-menu'; document.body.appendChild(MENU_F);
+  document.addEventListener('click', function(e){ if(MENU_F.style.display==='block' && !MENU_F.contains(e.target) && !e.target.classList.contains('funnel')) MENU_F.style.display='none'; }); }
+function escapeHtmlP(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+function GrilleP(mount, rows, cols, opts){
+  opts=opts||{};
+  var state={sortK:opts.sortK||null, sortDir:opts.sortDir||1, filters:{}, search:''};
+  var table=document.createElement('table');
+  var thead=document.createElement('thead'); var trh=document.createElement('tr');
+  cols.forEach(function(col){
+    var th=document.createElement('th');
+    if(col.num) th.className='num';
+    th.innerHTML='<span class="lbl">'+col.label+'</span> <span class="fl">⇅</span>'+(col.funnel?' <span class="funnel" title="Filtrer">▾</span>':'');
+    th.querySelector('.lbl').onclick=function(){ state.sortDir=(state.sortK===col.k)?-state.sortDir:1; state.sortK=col.k; apply(); };
+    var fn=th.querySelector('.funnel'); if(fn) fn.onclick=function(e){ e.stopPropagation(); openFunnel(col, th); };
+    trh.appendChild(th);
+  });
+  thead.appendChild(trh); table.appendChild(thead);
+  var tbody=document.createElement('tbody'); table.appendChild(tbody);
+  mount.appendChild(table);
+  function val(r,col){ return r[col.k]==null?'':String(r[col.k]); }
+  function openFunnel(col, th){
+    ensureMenuF();
+    var counts={}; rows.forEach(function(r){ var v=val(r,col)||'(vide)'; counts[v]=(counts[v]||0)+1; });
+    var sel=state.filters[col.k];
+    var vals=Object.keys(counts).sort(function(a,b){ return a.localeCompare(b,'fr',{numeric:true}); });
+    var h='<div class="fm-rech"><input type="text" placeholder="Rechercher…"></div><label class="fm-all"><input type="checkbox" class="fm-tout" checked> (Tout sélectionner)</label><div class="fm-list">';
+    vals.forEach(function(v){ var c=!sel||sel.has(v); h+='<label><input type="checkbox" class="fm-v" data-v="'+v.replace(/"/g,'&quot;')+'"'+(c?' checked':'')+'> <span>'+escapeHtmlP(v)+'</span> <span class="cnt">('+counts[v]+')</span></label>'; });
+    h+='</div><div class="fm-act"><button class="fm-eff">Effacer</button></div>';
+    MENU_F.innerHTML=h;
+    var r=th.getBoundingClientRect(); MENU_F.style.display='block'; MENU_F.style.top=(r.bottom+4)+'px'; MENU_F.style.left=Math.max(8,Math.min(r.left,window.innerWidth-300))+'px';
+    function appliquer(){ var ch=[].slice.call(MENU_F.querySelectorAll('.fm-v:checked')).map(function(c){return c.dataset.v;}); var tot=MENU_F.querySelectorAll('.fm-v').length;
+      if(ch.length===tot) delete state.filters[col.k]; else state.filters[col.k]=new Set(ch); apply(); marquer(); }
+    [].forEach.call(MENU_F.querySelectorAll('.fm-v'), function(c){ c.onchange=appliquer; });
+    MENU_F.querySelector('.fm-tout').onchange=function(){ var self=this; [].forEach.call(MENU_F.querySelectorAll('.fm-v'), function(c){ if(c.closest('label').style.display!=='none') c.checked=self.checked; }); appliquer(); };
+    MENU_F.querySelector('.fm-eff').onclick=function(){ delete state.filters[col.k]; MENU_F.style.display='none'; apply(); marquer(); };
+    MENU_F.querySelector('.fm-rech input').oninput=function(){ var q=this.value.toLowerCase(); [].forEach.call(MENU_F.querySelectorAll('.fm-v'), function(c){ c.closest('label').style.display=c.dataset.v.toLowerCase().indexOf(q)>=0?'':'none'; }); };
+  }
+  function marquer(){ cols.forEach(function(col,i){ var f=trh.children[i].querySelector('.funnel'); if(f) f.classList.toggle('actif', !!state.filters[col.k]); }); }
+  function passe(r){
+    for(var k in state.filters){ var col=null; cols.forEach(function(c){ if(c.k===k) col=c; }); if(!state.filters[k].has(val(r,col)||'(vide)')) return false; }
+    if(state.search){ var q=state.search.toLowerCase(); var hay=cols.map(function(c){ return val(r,c); }).join(' ').toLowerCase(); if(hay.indexOf(q)<0) return false; }
+    return true;
+  }
+  function apply(){
+    var vis=rows.filter(passe);
+    if(state.sortK){ var col=null; cols.forEach(function(c){ if(c.k===state.sortK) col=c; });
+      if(col) vis.sort(function(a,b){ return state.sortDir*String(val(a,col)).localeCompare(String(val(b,col)),'fr',{numeric:true}); }); }
+    tbody.innerHTML='';
+    vis.forEach(function(r){ var tr=document.createElement('tr'); tr.innerHTML=cols.map(function(c){ var k=[c.num?'num':'',(c.num||c.mono)?'mono':''].filter(Boolean).join(' '); return '<td'+(k?' class="'+k+'"':'')+'>'+c.render(r)+'</td>'; }).join(''); tbody.appendChild(tr); });
+    cols.forEach(function(c,i){ var fl=trh.children[i].querySelector('.fl'); if(state.sortK===c.k){ fl.textContent=state.sortDir===1?'▲':'▼'; fl.style.opacity='1'; } else { fl.textContent='⇅'; fl.style.opacity='.4'; } });
+    if(opts.onCount) opts.onCount(vis.length, rows.length);
+  }
+  apply(); marquer();
+  return { setSearch: function(s){ state.search=s; apply(); }, refresh: apply };
+}
+
+function espNb(n){ n=Number(n)||0; var neg=n<0; n=Math.abs(n); var p=n.toFixed(2).split('.'); p[0]=p[0].replace(/\B(?=(\d{3})+(?!\d))/g,' '); return (neg?'-':'')+p.join('.'); }
+function arg2(n){ return espNb(n)+' $'; }
+function setTxt(id,t){ var el=document.getElementById(id); if(el) el.textContent=t; }
+function basculerBulle(id){ var c=document.getElementById('bc-'+id); var f=document.getElementById('fl-'+id); if(!c) return; var ferme=c.style.display!=='none'; c.style.display=ferme?'none':''; if(f) f.textContent=ferme?'▸':'▾'; }
+
+var dejaSet={}, selection={}, horsG=null, entFact=[], horsFact=[], entSearch='', mpIds=[];
+
+var COLS_FACT=[
+ {k:'payer',label:'Payer',render:function(f){ return cellPayer(f); }},
+ {k:'date',label:'Date',mono:true,render:function(f){return f.date||'—';}},
+ {k:'no',label:'N° fact.',render:function(f){return escapeHtmlP(f.no||'—');}},
+ {k:'fournisseur',label:'Fournisseur',funnel:true,render:function(f){return '<span class="fourn">'+escapeHtmlP(f.fournisseur)+'</span>';}},
+ {k:'montant',label:'Montant',num:true,render:function(f){return arg2(f.montant);}},
+ {k:'paye',label:'Payé',num:true,render:function(f){return arg2(f.paye);}},
+ {k:'reste',label:'Reste à payer',num:true,render:function(f){return '<strong>'+arg2(f.reste)+'</strong>';}},
+ {k:'voir',label:'',render:function(f){ return cellVoir(f); }},
+];
+function cellPayer(f){ return dejaSet[f.id] ? '<span class="chk-annuler" data-fid="'+f.id+'" title="Annuler ma proposition (corriger une erreur)" style="cursor:pointer;white-space:nowrap;font-weight:800;color:#136B36;">✓ <span style="color:#DC2626;">✕</span></span>' : '<input type="checkbox" class="chk-payer" data-fid="'+f.id+'"'+(selection[f.id]?' checked':'')+' style="width:18px;height:18px;cursor:pointer;">'; }
+function cellVoir(f){ return f.pdf ? '<span class="voir-fact" data-fid="'+f.id+'" data-four="'+escapeHtmlP(f.fournisseur)+'" title="Voir la facture" style="cursor:pointer;font-size:17px;">👁</span>' : '<span style="color:#cbd5e1;" title="Aucun document joint">—</span>'; }
+function sumReste(a){ return a.reduce(function(s,f){return s+f.reste;},0); }
+function basculerGrpEnt(h){ var c=h.nextElementSibling; if(!c) return; var ferme=c.style.display!=='none'; c.style.display=ferme?'none':''; var fl=h.querySelector('.grp-fl'); if(fl) fl.textContent=ferme?'▸':'▾'; }
+function renderEntenteGroupes(){
+  var cont=document.getElementById('mount-ent'); if(!cont) return;
+  var q=(entSearch||'').toLowerCase();
+  var facs=entFact.filter(function(f){ return !q || (f.fournisseur+' '+f.no).toLowerCase().indexOf(q)>=0; });
+  var groups={}, ordre=[];
+  facs.forEach(function(f){ if(!groups[f.fournisseur]){ groups[f.fournisseur]=[]; ordre.push(f.fournisseur); } groups[f.fournisseur].push(f); });
+  ordre.sort(function(a,b){ var ta=groups[a].reduce(function(s,f){return s+f.reste;},0); var tb=groups[b].reduce(function(s,f){return s+f.reste;},0); return tb-ta; });
+  setTxt('cpt-ent', facs.length+' / '+entFact.length+' factures');
+  if(ordre.length===0){ cont.innerHTML='<div style="padding:20px;color:var(--texte2);text-align:center;">Aucune facture avec entente.</div>'; return; }
+  var html='';
+  ordre.forEach(function(nom){
+    var fs=groups[nom];
+    var tot=fs.reduce(function(s,f){return s+f.reste;},0);
+    var fac=fs.reduce(function(s,f){return s+f.montant;},0);
+    html+='<div class="grp-ent">'+
+      '<div class="grp-ent-h" onclick="basculerGrpEnt(this)"><div class="grp-t">'+escapeHtmlP(nom)+'</div>'+
+      '<div class="grp-r"><span class="grp-meta">'+fs.length+' facture(s) · facturé '+arg2(fac)+'</span>'+
+      '<span class="grp-tot">Reste à payer '+arg2(tot)+'</span><span class="grp-fl">▸</span></div></div>'+
+      '<div class="grp-ent-corps" style="display:none;"><table><thead><tr>'+
+      '<th style="width:8%;text-align:center;">Payer</th><th style="width:13%;">Date</th><th style="width:15%;">N° fact.</th>'+
+      '<th class="num" style="width:18%;">Montant</th><th class="num" style="width:16%;">Payé</th><th class="num" style="width:22%;">Reste à payer</th><th style="width:8%;text-align:center;">Voir</th></tr></thead><tbody>';
+    fs.forEach(function(f){
+      html+='<tr><td style="text-align:center;">'+cellPayer(f)+'</td><td class="mono">'+(f.date||'—')+'</td><td>'+escapeHtmlP(f.no||'—')+'</td>'+
+        '<td class="num mono">'+arg2(f.montant)+'</td><td class="num mono">'+arg2(f.paye)+'</td>'+
+        '<td class="num mono"><strong>'+arg2(f.reste)+'</strong></td><td style="text-align:center;">'+cellVoir(f)+'</td></tr>';
+    });
+    html+='</tbody></table></div></div>';
+  });
+  cont.innerHTML=html;
+}
+function refreshEnt(){ renderEntenteGroupes(); }
+function factById(id){ for(var i=0;i<FACTURES.length;i++){ if(String(FACTURES[i].id)===String(id)) return FACTURES[i]; } return null; }
+function majBarreSel(){
+  var ids=Object.keys(selection);
+  var bar=document.getElementById('barre-selection');
+  if(!bar) return;
+  if(ids.length===0){ bar.style.display='none'; return; }
+  var tot=0; ids.forEach(function(id){ var f=factById(id); if(f) tot+=f.reste; });
+  setTxt('sel-nb', ids.length); setTxt('sel-total', arg2(tot));
+  bar.style.display='flex';
+}
+function viderSelection(){ selection={}; if(horsG) horsG.refresh(); refreshEnt(); majBarreSel(); }
+function voirFacture(fid, four){
+  document.getElementById('pdf-titre').textContent = four ? ('Facture — '+four) : 'Facture';
+  document.getElementById('pdf-frame').src = '';
+  document.body.classList.add('avec-pdf');
+  document.getElementById('panneau-pdf').style.display='flex';
+  rpc('portail_pdf_b64', { cle: CLE, p_fid: Number(fid) }).then(function(r){
+    if(!r || !r.ok){ alert((r&&r.erreur)||'PDF non disponible.'); fermerPdf(); return; }
+    var bin=atob(r.b64), n=bin.length, o=new Uint8Array(n);
+    for(var i=0;i<n;i++) o[i]=bin.charCodeAt(i);
+    document.getElementById('pdf-frame').src = URL.createObjectURL(new Blob([o],{type:'application/pdf'}));
+  }).catch(function(){ alert('Erreur réseau.'); fermerPdf(); });
+}
+function fermerPdf(){
+  document.body.classList.remove('avec-pdf');
+  document.getElementById('panneau-pdf').style.display='none';
+  document.getElementById('pdf-frame').src='';
+}
+function annulerProp(fid){
+  if(!confirm('Annuler la proposition envoyée pour cette facture ? Vous pourrez la saisir à nouveau.')) return;
+  rpc('portail_annuler', { cle: CLE, p_fid: Number(fid) })
+    .then(function(d){
+      if(d && d.ok){
+        if(d.supprime>0){ delete dejaSet[fid]; if(horsG) horsG.refresh(); refreshEnt(); }
+        else { alert('Le comptable a déjà reçu cette proposition au bureau — impossible de l\'annuler ici.'); }
+      } else { alert((d&&d.erreur)?d.erreur:'Erreur.'); }
+    })
+    .catch(function(){ alert('Erreur réseau.'); });
+}
+function ouvrirPaieMulti(){
+  mpIds=Object.keys(selection); if(mpIds.length===0) return;
+  if(mpIds.length===1){
+    var f=factById(mpIds[0]);
+    setTxt('mp-titre', f.fournisseur||'Facture');
+    setTxt('mp-sous', 'Facture n° '+(f.no||'—')+' · reste '+arg2(f.reste));
+    document.getElementById('mp-montant-bloc').style.display='';
+    document.getElementById('mp-montant').value = f.reste ? f.reste.toFixed(2) : '';
+    document.getElementById('mp-multi-note').style.display='none';
+  } else {
+    var tot=0; mpIds.forEach(function(id){ var ff=factById(id); if(ff) tot+=ff.reste; });
+    setTxt('mp-titre', mpIds.length+' factures sélectionnées');
+    setTxt('mp-sous', 'Total reste '+arg2(tot));
+    document.getElementById('mp-montant-bloc').style.display='none';
+    document.getElementById('mp-multi-note').style.display='';
+  }
+  document.getElementById('mp-payer').checked=true;
+  document.getElementById('mp-compte').value='';
+  var ca=document.getElementById('mp-compte-autre'); ca.style.display='none'; ca.value='';
+  document.getElementById('mp-date').value = TODAY;
+  document.getElementById('mp-comment').value='';
+  document.getElementById('mp-msg').textContent='';
+  document.getElementById('modal-paie').style.display='block';
+}
+function mpFermer(){ document.getElementById('modal-paie').style.display='none'; mpIds=[]; }
+function mpAutre(){ var s=document.getElementById('mp-compte'); var i=document.getElementById('mp-compte-autre'); var a=(s.value==='__autre__'); i.style.display=a?'block':'none'; if(a) i.focus(); }
+function mpEnvoyer(){
+  if(!mpIds || mpIds.length===0) return;
+  var msg=document.getElementById('mp-msg'); msg.textContent='Envoi…'; msg.className='msg';
+  var compte=document.getElementById('mp-compte').value;
+  if(compte==='__autre__'){ compte=(document.getElementById('mp-compte-autre').value||'').trim(); }
+  var a_payer=document.getElementById('mp-payer').checked;
+  var date=document.getElementById('mp-date').value;
+  var comment=document.getElementById('mp-comment').value;
+  var single=(mpIds.length===1);
+  var mSingle=(document.getElementById('mp-montant').value||'').replace(/[\s ]/g,'').replace(',', '.');
+  var envois=mpIds.map(function(id){
+    var f=factById(id);
+    var montant = single ? (mSingle?Number(mSingle):null) : (f?Number(f.reste.toFixed(2)):null);
+    return rpc('portail_proposer', {
+      cle: CLE, p_fid: Number(id),
+      p_a_payer: !!a_payer,
+      p_compte: compte || null,
+      p_montant: montant,
+      p_date_paiement: date || null,
+      p_commentaire: comment || null
+    });
+  });
+  Promise.all(envois).then(function(res){
+    var ok=res.every(function(d){return d && d.ok;});
+    if(ok){ mpIds.forEach(function(id){ dejaSet[id]=true; delete selection[id]; }); if(horsG) horsG.refresh(); refreshEnt(); majBarreSel(); mpFermer(); }
+    else { msg.textContent='Une partie n\'a pas pu être envoyée.'; msg.className='msg err'; }
+  }).catch(function(){ msg.textContent='Erreur réseau'; msg.className='msg err'; });
+}
+document.getElementById('modal-paie').addEventListener('click', function(e){ if(e.target===this) mpFermer(); });
+
+/* ===== État de compte : rendu identique au portail de l'app ===== */
+function badgeType(t){
+  if(t==='Facture') return '<span class="badge" style="background:#FEF3E2;color:#92560A;">Facture</span>';
+  if(t==='Paiement') return '<span class="badge" style="background:#E8F7EE;color:#136B36;">Paiement</span>';
+  return '<span class="badge" style="background:#0E7490;color:#fff;">↩ Crédit</span>';
+}
+function badgeStatut(f){
+  if(f.est_retour) return '<span class="badge" style="background:#0E7490;color:#fff;">↩ CRÉDIT</span>';
+  if(f.statut==='PAYEE') return '<span class="badge" style="background:#E8F7EE;color:#136B36;">PAYÉE</span>';
+  if(f.statut==='PARTIELLEMENT') return '<span class="badge b-partiel">PARTIELLE</span>';
+  return '<span class="badge b-retard">À PAYER</span>';
+}
+function renderEtat(){
+  var totalSolde=ETAT.reduce(function(s,g){return s+(g.solde||0);},0);
+  setTxt('ec-kpi-nb', ETAT.length);
+  setTxt('ec-kpi-solde', arg2(totalSolde));
+  var sel=document.getElementById('ec-select');
+  ETAT.forEach(function(g,i){
+    var o=document.createElement('option'); o.value='ec-'+i;
+    o.textContent=g.nom+' — solde '+arg2(g.solde);
+    sel.appendChild(o);
+  });
+  var html='';
+  ETAT.forEach(function(g,i){
+    var nbFact=g.mouvements.filter(function(m){return m.type==='Facture';}).length;
+    html+='<div class="ec-bloc" id="ec-'+i+'" style="display:none;">'
+      +'<div class="sommaire" style="margin-top:16px;">'
+      +'<div class="kpi"><div class="l">Total facturé</div><div class="v">'+arg2(g.facture)+'</div><div style="font-size:11px;color:var(--texte2);margin-top:3px;">'+nbFact+' facture(s)</div></div>'
+      +'<div class="kpi" style="border-left-color:var(--vert);"><div class="l">Total payé</div><div class="v" style="color:var(--vert-tx)">'+arg2(g.paye)+'</div></div>'
+      +'<div class="kpi" style="border-left-color:var(--rouge);"><div class="l">Solde dû</div><div class="v" style="color:var(--rouge)">'+arg2(g.solde)+'</div>'
+      +(g.credits>0.01?'<div style="font-size:11px;color:#0E7490;margin-top:3px;">↩ inclut '+arg2(g.credits)+' de crédits/retours</div>':'')
+      +'</div></div>';
+    /* Grand livre */
+    html+='<div class="carte" style="margin-top:16px;">'
+      +'<div class="carte-h carte-pliable" onclick="basculerCarte(this)"><span>📒 Grand livre — '+escapeHtmlP(g.nom)+'</span><span class="fl-carte">▾</span></div>'
+      +'<div class="tbl-scroll"><table><thead><tr><th>Date</th><th>Type</th><th>Référence</th><th class="num">Débit (facture)</th><th class="num">Crédit (paiement)</th><th class="num">Solde</th></tr></thead><tbody>';
+    g.mouvements.forEach(function(m){
+      html+='<tr><td class="mono">'+(m.date||'—')+'</td><td>'+badgeType(m.type)+'</td><td>'+escapeHtmlP(m.ref)+'</td>'
+        +'<td class="num mono">'+(m.debit?arg2(m.debit):'—')+'</td>'
+        +'<td class="num mono" style="color:#136B36;">'+(m.credit?arg2(m.credit):'—')+'</td>'
+        +'<td class="num mono"><strong>'+arg2(m.solde)+'</strong></td></tr>';
+    });
+    html+='</tbody><tfoot><tr><td colspan="3"><strong>Totaux</strong></td><td class="num mono"><strong>'+arg2(g.facture)+'</strong></td><td class="num mono" style="color:#136B36;"><strong>'+arg2(g.paye)+'</strong></td><td class="num mono"><strong>'+arg2(g.solde)+'</strong></td></tr></tfoot></table></div></div>';
+    /* Paiements de l'employeur */
+    html+='<div class="carte" style="margin-top:16px;">'
+      +'<div class="carte-h carte-pliable" onclick="basculerCarte(this)"><span>💰 Paiements de l\'employeur — appliqués aux factures</span><span class="fl-carte">▾</span></div>'
+      +'<div class="tbl-scroll"><table><thead><tr><th>Date</th><th>Type</th><th>N° facture / Méthode · réf.</th><th class="num">Montant facturé</th><th class="num">Montant payé</th><th class="num">Solde</th><th>Statut / Compte</th></tr></thead><tbody>';
+    g.factures.forEach(function(f){
+      if(f.est_retour){
+        html+='<tr style="background:#ecfeff;"><td class="mono">'+(f.date||'—')+'</td><td>'+badgeType('Crédit')+'</td><td><strong>'+escapeHtmlP(f.no||'—')+'</strong></td>'
+          +'<td class="num mono">—</td><td class="num mono" style="color:#136B36;"><strong>'+arg2(f.montant_abs)+'</strong></td><td class="num mono">—</td>'
+          +'<td><span class="badge" style="background:#0E7490;color:#fff;">↩ RETOUR / CRÉDIT</span></td></tr>';
       } else {
-        h += '<span class="quand">— reçue au bureau</span>';
+        var solde=f.montant;
+        var st = f.statut==='PAYEE' ? '<span class="badge" style="background:#E8F7EE;color:#136B36;">PAYÉE</span>'
+               : f.statut==='PARTIELLEMENT' ? '<span class="badge b-partiel">PARTIELLE · reste '+arg2(f.reste)+'</span>'
+               : '<span class="badge b-retard">À PAYER · reste '+arg2(f.reste)+'</span>';
+        html+='<tr style="background:#f8f9fb;"><td class="mono">'+(f.date||'—')+'</td><td>'+badgeType('Facture')+'</td><td><strong>'+escapeHtmlP(f.no||'—')+'</strong></td>'
+          +'<td class="num mono"><strong>'+arg2(f.montant)+'</strong></td><td class="num mono">—</td><td class="num mono"><strong>'+arg2(solde)+'</strong></td><td>'+st+'</td></tr>';
+        f.paiements.forEach(function(p){
+          solde=solde-p.montant;
+          html+='<tr><td class="mono" style="padding-left:26px;">'+(p.date||'—')+'</td><td style="color:var(--texte2);">↳ Paiement</td>'
+            +'<td style="color:var(--texte2);">'+escapeHtmlP(p.methode)+(p.reference?' · '+escapeHtmlP(p.reference):'')+'</td>'
+            +'<td class="num mono">—</td><td class="num mono" style="color:#136B36;">'+arg2(p.montant)+'</td>'
+            +'<td class="num mono">'+arg2(solde)+'</td><td style="color:var(--texte2);">'+escapeHtmlP(p.compte||'—')+'</td></tr>';
+        });
       }
-      h += '</div>';
-    } else {
-      h += '<form class="proposer" onsubmit="return proposer(event,' + f.fid + ')">'
-        + '<label class="paie"><input type="checkbox" name="a_payer" checked> Je paie</label>'
-        + '<select name="compte"><option value="">Compte…</option>'
-        + COMPTES.map(function(c){ return '<option>' + htmlesc(c) + '</option>'; }).join('')
-        + '</select>'
-        + '<input name="montant" size="10" value="' + Number(f.reste||0).toFixed(2) + '" title="Montant">'
-        + '<input type="date" name="date_paiement" value="' + AUJ + '">'
-        + '<input name="commentaire" placeholder="Commentaire (optionnel)" style="flex:1;min-width:160px">'
-        + '<button>Envoyer</button></form>';
-    }
-    h += '</div></div>';
-    (f.en_entente ? dEnt : dHors).insertAdjacentHTML('beforeend', h);
+    });
+    html+='</tbody><tfoot><tr><td colspan="3"><strong>Totaux</strong></td><td class="num mono"><strong>'+arg2(g.facture)+'</strong></td><td class="num mono" style="color:#136B36;"><strong>'+arg2(g.paye)+'</strong></td><td class="num mono"><strong>'+arg2(g.solde)+'</strong></td><td></td></tr></tfoot></table></div></div>';
+    /* Détail des factures */
+    html+='<div class="carte" style="margin-top:16px;">'
+      +'<div class="carte-h carte-pliable" onclick="basculerCarte(this)"><span>Détail des factures</span><span class="fl-carte">▾</span></div>'
+      +'<div class="tbl-scroll"><table><thead><tr><th>Date</th><th>N° facture</th><th class="num">Montant</th><th class="num">Payé</th><th class="num">Reste</th><th>Échéance</th><th>Statut</th></tr></thead><tbody>';
+    g.factures.forEach(function(f){
+      html+='<tr><td class="mono">'+(f.date||'—')+'</td><td>'+escapeHtmlP(f.no||'—')+'</td>'
+        +'<td class="num mono">'+arg2(f.montant)+'</td><td class="num mono" style="color:#136B36;">'+arg2(f.paye)+'</td>'
+        +'<td class="num mono">'+arg2(f.reste)+'</td><td class="mono">'+(f.echeance||'—')+'</td><td>'+badgeStatut(f)+'</td></tr>';
+    });
+    html+='</tbody></table></div></div></div>';
   });
-  if (!dEnt.children.length) dEnt.innerHTML = '<div class="vide">Aucune facture en entente à payer.</div>';
-  if (!dHors.children.length) dHors.innerHTML = '<div class="vide">Aucune facture hors entente à payer.</div>';
-  document.getElementById('totaux').innerHTML =
-      '<div class="tot"><div class="v">' + esp(tEnt + tHors) + '</div><div class="l">Total à payer</div></div>'
-    + '<div class="tot"><div class="v">' + esp(tEnt) + '</div><div class="l">En entente</div></div>'
-    + '<div class="tot"><div class="v">' + esp(tHors) + '</div><div class="l">Hors entente</div></div>'
-    + '<div class="tot"><div class="v">' + nRetard + '</div><div class="l">En retard</div></div>';
+  document.getElementById('ec-conteneur').innerHTML=html;
 }
 
-function charger(){
-  rpc('portail_donnees', { cle: CLE }).then(function(r){
-    if (!r || !r.ok) {
-      document.getElementById('chargement').textContent =
-        (r && r.erreur === 'Accès refusé')
-          ? 'Accès refusé — lien invalide. Communiquez avec le bureau.'
-          : 'Erreur de chargement — réessayez plus tard.';
-      return;
-    }
-    FACTURES = r.factures || []; COMPTES = r.comptes || []; PROPS = r.propositions || [];
-    document.getElementById('sous-titre').textContent =
-      'Factures à payer · Données à jour au ' + (r.sync || '—')
-      + ' · Vos propositions sont transmises au bureau pour application.';
-    document.getElementById('chargement').style.display = 'none';
-    document.getElementById('contenu').style.display = 'block';
-    rendre();
-  }).catch(function(){
-    document.getElementById('chargement').textContent = 'Erreur réseau — vérifiez votre connexion.';
+/* ===== Bottin ===== */
+var COLS_BOTTIN=[
+ {k:'prenom',label:'Prénom',render:function(e){return escapeHtmlP(e.prenom||'—');}},
+ {k:'nom',label:'Nom',render:function(e){return '<span class="fourn">'+escapeHtmlP(e.nom||'—')+'</span>';}},
+ {k:'metier',label:'Métier',funnel:true,render:function(e){return escapeHtmlP(e.metier||'—');}},
+ {k:'tel',label:'Téléphone',mono:true,render:function(e){return escapeHtmlP(e.tel||'—');}},
+ {k:'courriel',label:'Courriel',render:function(e){return e.courriel?'<a href="mailto:'+escapeHtmlP(e.courriel)+'" style="color:#1E3A8A">'+escapeHtmlP(e.courriel)+'</a>':'—';}},
+ {k:'embauche',label:'Embauche',mono:true,render:function(e){return escapeHtmlP(e.embauche||'—');}},
+];
+
+/* ===== Initialisation après chargement des données ===== */
+function initPortail(D){
+  TODAY = D.today || new Date().toISOString().slice(0,10);
+  FACTURES = D.factures || [];
+  EMPLOYES = D.bottin || [];
+  COMPTES = D.comptes || [];
+  ETAT = D.etat || [];
+  FACTURES.forEach(function(f){ if(f.deja) dejaSet[f.id]=true; });
+
+  document.getElementById('hdr-meta').textContent =
+    'Excavation Anthony Inc. (NEQ 1178440104) · '+TODAY
+    +' · Données à jour au '+(D.sync||'—')
+    +' · Consultation — vos paiements et commentaires sont transmis au comptable pour validation.';
+
+  /* KPIs factures */
+  var totReste=sumReste(FACTURES);
+  setTxt('kpi-nb', FACTURES.length);
+  setTxt('kpi-reste', arg2(totReste));
+
+  /* Modal : comptes */
+  var sel=document.getElementById('mp-compte');
+  var h='<option value="">— Choisir / indiquer —</option><option value="Paiement fournisseur (RBC)">Paiement fournisseur (RBC)</option>';
+  COMPTES.forEach(function(c){ h+='<option value="'+escapeHtmlP(c.nom)+'">'+escapeHtmlP(c.nom)+(c.institution?' ('+escapeHtmlP(c.institution)+')':'')+'</option>'; });
+  h+='<option value="__autre__">Autre (préciser)…</option>';
+  sel.innerHTML=h;
+
+  /* Bottin */
+  setTxt('bot-titre', '👥 Employés ('+EMPLOYES.length+') — lecture seule');
+  var botG = GrilleP(document.getElementById('mount-bottin'), EMPLOYES, COLS_BOTTIN,
+    {sortK:'nom', sortDir:1, onCount:function(n,t){ setTxt('bot-compteur', n+' / '+t+' employés'); }});
+  var rb=document.getElementById('rech-bot'); if(rb) rb.addEventListener('input', function(e){ botG.setSearch(e.target.value); });
+
+  /* Factures : 2 bulles */
+  horsFact=FACTURES.filter(function(f){return !f.en_entente;});
+  entFact=FACTURES.filter(function(f){return f.en_entente;});
+  setTxt('hb-meta', horsFact.length+' factures'); setTxt('hb-sol', arg2(sumReste(horsFact)));
+  setTxt('eb-meta', entFact.length+' factures'); setTxt('eb-sol', arg2(sumReste(entFact)));
+  horsG = GrilleP(document.getElementById('mount-hors'), horsFact, COLS_FACT,
+    {sortK:'reste', sortDir:-1, onCount:function(n,t){ setTxt('cpt-hors', n+' / '+t+' factures'); }});
+  renderEntenteGroupes();
+  var rh=document.getElementById('rech-hors'); if(rh) rh.addEventListener('input',function(e){horsG.setSearch(e.target.value);});
+  var re=document.getElementById('rech-ent'); if(re) re.addEventListener('input',function(e){entSearch=e.target.value; refreshEnt();});
+  ['mount-hors','mount-ent'].forEach(function(mid){
+    var m=document.getElementById(mid); if(!m) return;
+    m.addEventListener('change', function(e){
+      var t=e.target;
+      if(t && t.classList && t.classList.contains('chk-payer')){
+        var fid=t.dataset.fid;
+        if(t.checked) selection[fid]=true; else delete selection[fid];
+        majBarreSel();
+      }
+    });
+    m.addEventListener('click', function(e){
+      var a=e.target.closest ? e.target.closest('.chk-annuler') : null;
+      if(a){ annulerProp(a.dataset.fid); return; }
+      var v=e.target.closest ? e.target.closest('.voir-fact') : null;
+      if(v){ voirFacture(v.dataset.fid, v.dataset.four); }
+    });
   });
+
+  /* État de compte */
+  renderEtat();
+
+  document.getElementById('chargement-page').style.display='none';
+  document.getElementById('contenu-page').style.display='block';
 }
 
-function proposer(ev, fid){
-  ev.preventDefault();
-  var f = ev.target;
-  var montant = (f.montant.value || '').replace(/[\s ]/g,'').replace(',', '.');
-  rpc('portail_proposer', {
-    cle: CLE, p_fid: fid,
-    p_a_payer: f.a_payer.checked,
-    p_compte: f.compte.value || null,
-    p_montant: montant ? Number(montant) : null,
-    p_date_paiement: f.date_paiement.value || null,
-    p_commentaire: f.commentaire.value || null
-  }).then(function(r){
-    if (r && r.ok) { message('Proposition envoyée au bureau.'); setTimeout(charger, 700); }
-    else message((r && r.erreur) || 'Erreur — réessayez.', true);
-  }).catch(function(){ message('Erreur réseau — réessayez.', true); });
-  return false;
-}
-function annuler(fid){
-  if (!confirm('Annuler votre proposition pour cette facture ?')) return;
-  rpc('portail_annuler', { cle: CLE, p_fid: fid }).then(function(r){
-    if (r && r.ok) { message('Proposition annulée.'); setTimeout(charger, 500); }
-    else message((r && r.erreur) || 'Erreur — réessayez.', true);
-  });
-}
-function voirPdf(fid){
-  message('Ouverture du PDF…');
-  rpc('portail_pdf_b64', { cle: CLE, p_fid: fid }).then(function(r){
-    if (!r || !r.ok) { message((r && r.erreur) || 'PDF non disponible.', true); return; }
-    var bin = atob(r.b64), n = bin.length, octets = new Uint8Array(n);
-    for (var i = 0; i < n; i++) octets[i] = bin.charCodeAt(i);
-    var url = URL.createObjectURL(new Blob([octets], { type: 'application/pdf' }));
-    window.open(url, '_blank');
-  }).catch(function(){ message('Erreur réseau — réessayez.', true); });
-}
-charger();
+rpc('portail_donnees', { cle: CLE }).then(function(r){
+  if(!r || !r.ok){
+    document.getElementById('chargement-page').textContent =
+      (r && r.erreur === 'Accès refusé')
+        ? 'Accès refusé — lien invalide. Communiquez avec le bureau.'
+        : 'Erreur de chargement — réessayez dans quelques minutes.';
+    return;
+  }
+  initPortail(r);
+}).catch(function(){
+  document.getElementById('chargement-page').textContent='Erreur réseau — vérifiez votre connexion Internet.';
+});
 </script>
 </body>
 </html>
