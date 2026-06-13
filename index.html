@@ -364,11 +364,50 @@ function cbChargerEtat(){
     cbRendre(r);
   }).catch(function(){ box.innerHTML = '<div style="color:var(--texte2);padding:12px;">Erreur réseau.</div>'; });
 }
+function cbBarre(p){
+  if (p === null || p === undefined) return '<span style="color:var(--texte2);">—</span>';
+  var coul = p >= 90 ? '#1a7f37' : (p >= 50 ? '#C98A2C' : '#b91c1c');
+  return '<div style="display:flex;align-items:center;gap:6px;justify-content:center;">'
+    + '<div style="width:60px;height:7px;background:#e8eaed;border-radius:4px;overflow:hidden;">'
+    + '<div style="height:100%;width:'+p+'%;background:'+coul+';"></div></div>'
+    + '<strong style="color:'+coul+';font-size:12px;">'+p+' %</strong></div>';
+}
+function cbRendreResume(resume){
+  if (!resume || !resume.length) return '';
+  var h = '<div class="carte" style="padding:8px 6px;margin-bottom:14px;overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:13px;">';
+  h += '<thead><tr style="text-align:left;border-bottom:2px solid var(--bordure);">'
+    + '<th style="padding:8px 10px;">Trimestre</th><th style="padding:8px 10px;">Période</th>'
+    + '<th style="padding:8px 10px;text-align:center;">Reçus manquants</th>'
+    + '<th style="padding:8px 10px;text-align:center;">Relevés manquants</th>'
+    + '<th style="padding:8px 10px;text-align:center;">Paiements fournisseurs liés</th>'
+    + '<th style="padding:8px 10px;text-align:center;">Progression</th></tr></thead><tbody>';
+  resume.forEach(function(t){
+    var recus = !t.commence ? '<span style="color:var(--texte2);">—</span>'
+      : (t.recus_manquants === 0 ? '<span style="color:#1a7f37;font-weight:600;">✓ 0</span>'
+                                 : '<span style="color:#b91c1c;font-weight:700;">'+t.recus_manquants+'</span>');
+    var rel = !t.commence ? '<span style="color:var(--texte2);">—</span>'
+      : (t.releves_manquants === 0 ? '<span style="color:#1a7f37;font-weight:600;">✓ '+t.releves_recus+' reçu(s)</span>'
+                                   : '<span style="color:#b91c1c;font-weight:700;">'+t.releves_manquants+' trou(s)</span>');
+    var paie = (t.paie_total === 0) ? '<span style="color:var(--texte2);">aucun</span>'
+      : (t.paie_ok ? '<span style="color:#1a7f37;font-weight:600;">✓ Oui ('+t.paie_lies+'/'+t.paie_total+')</span>'
+                   : '<span style="color:#b91c1c;font-weight:700;">Non — '+t.paie_lies+'/'+t.paie_total+'</span>');
+    h += '<tr style="border-bottom:1px solid var(--bordure);'+(t.est_courant?'background:var(--or-fond,#fbf3e4);':(t.commence?'':'opacity:.5;'))+'">'
+      + '<td style="padding:8px 10px;font-weight:700;">'+escapeHtmlP(t.titre)+(t.est_courant?' <span style="color:var(--or);font-size:11px;font-weight:500;">· en cours</span>':'')+'</td>'
+      + '<td style="padding:8px 10px;color:var(--texte2);">'+escapeHtmlP(t.periode)+'</td>'
+      + '<td style="padding:8px 10px;text-align:center;">'+recus+'</td>'
+      + '<td style="padding:8px 10px;text-align:center;">'+rel+'</td>'
+      + '<td style="padding:8px 10px;text-align:center;">'+paie+'</td>'
+      + '<td style="padding:8px 10px;text-align:center;">'+cbBarre(t.progression)+'</td></tr>';
+  });
+  h += '</tbody></table></div>';
+  return h;
+}
 function cbRendre(data){
   var tris = (data && data.trimestres) || [];
   var box = document.getElementById('cb-trimestres');
-  if (!tris.length){ box.innerHTML = '<div style="color:var(--texte2);padding:12px;">Aucune donnée pour le moment.</div>'; return; }
-  var h = '';
+  var resumeHtml = cbRendreResume(data && data.resume);
+  if (!tris.length){ box.innerHTML = resumeHtml + '<div style="color:var(--texte2);padding:12px;">Aucun détail pour le moment.</div>'; return; }
+  var h = resumeHtml;
   tris.forEach(function(t){
     var pastille = (!t.commence) ? '<span class="badge">à venir</span>'
       : (t.nb_manquants === 0 ? '<span class="badge entente">Tous reçus ('+t.nb_recus+')</span>'
