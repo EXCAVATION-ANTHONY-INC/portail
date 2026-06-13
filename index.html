@@ -142,6 +142,7 @@ thead th .funnel.actif{opacity:1;color:var(--or-doux);}
     <button class="onglet" data-tab="bilan">📊 Bilan fournisseurs</button>
     <button class="onglet" data-tab="ec">📒 État de compte fournisseurs</button>
     <button class="onglet" data-tab="bottin">👥 Bottin des employés</button>
+    <button class="onglet" data-tab="cb">🏦 Comptes bancaires</button>
   </div>
 
   <!-- ====================== ONGLET FACTURES ====================== -->
@@ -248,6 +249,27 @@ thead th .funnel.actif{opacity:1;color:var(--or-doux);}
     <div id="ec-conteneur"></div>
   </div>
 
+  <!-- ====================== ONGLET COMPTES BANCAIRES ====================== -->
+  <div id="tab-cb" class="tabpane">
+    <div class="carte" style="padding:16px 18px;margin-top:14px;">
+      <h2 style="margin-top:0;">📥 Déposer un relevé de compte</h2>
+      <p style="color:var(--texte2);font-size:13px;margin-top:0;">Choisissez le compte (par nom), le mois au besoin, puis le PDF du relevé. Il sera transmis au bureau.</p>
+      <form onsubmit="cbDeposer(event)" style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;">
+        <div><label style="font-size:12px;font-weight:700;display:block;margin-bottom:4px;">Compte</label>
+          <select id="cb-compte" class="recherche" style="margin:0;min-width:230px;"></select></div>
+        <div><label style="font-size:12px;font-weight:700;display:block;margin-bottom:4px;">Mois du relevé (optionnel)</label>
+          <input type="month" id="cb-mois" class="recherche" style="margin:0;"></div>
+        <div><label style="font-size:12px;font-weight:700;display:block;margin-bottom:4px;">Fichier PDF</label>
+          <input type="file" id="cb-fichier" accept="application/pdf" class="recherche" style="margin:0;"></div>
+        <button type="submit" class="btn btn-or">📤 Déposer</button>
+        <span class="msg" id="cb-msg" style="position:static;display:none;"></span>
+      </form>
+    </div>
+    <h2>📊 Relevés reçus / manquants par trimestre</h2>
+    <p style="color:var(--texte2);font-size:13px;margin-top:0;">Pour chaque trimestre, il faut tous les relevés couvrant la période (les comptes sont identifiés par nom, sans numéro).</p>
+    <div id="cb-trimestres"><div style="color:var(--texte2);padding:12px;">Chargement…</div></div>
+  </div>
+
   <div class="pied">Prestige Construction EA · Portail directeur (lecture seule) · Les actions sont transmises au comptable pour validation.</div>
   </div>
 </div>
@@ -313,12 +335,83 @@ document.querySelectorAll('.onglet').forEach(function(b){
     document.querySelectorAll('.onglet').forEach(function(x){ x.classList.remove('actif'); });
     b.classList.add('actif');
     var t = b.dataset.tab;
-    ['fact','bilan','bottin','ec'].forEach(function(x){
+    ['fact','bilan','bottin','ec','cb'].forEach(function(x){
       var p = document.getElementById('tab-'+x);
       if (p) p.classList.toggle('actif', x===t);
     });
+    if (t === 'cb') cbInit();
   };
 });
+
+/* ===== Comptes bancaires : dépôt de relevés + relevés reçus/manquants ===== */
+var CB_LOADED = false;
+function cbInit(){
+  var sel = document.getElementById('cb-compte');
+  if (sel && !sel.dataset.fait){
+    var h = '<option value="">— Choisir un compte —</option>';
+    COMPTES.forEach(function(c){
+      h += '<option value="'+escapeHtmlP(c.nom)+'">'+escapeHtmlP(c.nom)+(c.institution?' ('+escapeHtmlP(c.institution)+')':'')+'</option>';
+    });
+    sel.innerHTML = h; sel.dataset.fait = '1';
+  }
+  if (!CB_LOADED){ CB_LOADED = true; cbChargerEtat(); }
+}
+function cbChargerEtat(){
+  var box = document.getElementById('cb-trimestres');
+  box.innerHTML = '<div style="color:var(--texte2);padding:12px;">Chargement…</div>';
+  rpc('portail_releves_etat', { cle: CLE }).then(function(r){
+    if (!r || !r.ok){ box.innerHTML = '<div style="color:var(--texte2);padding:12px;">Liste indisponible pour le moment.</div>'; return; }
+    cbRendre(r);
+  }).catch(function(){ box.innerHTML = '<div style="color:var(--texte2);padding:12px;">Erreur réseau.</div>'; });
+}
+function cbRendre(data){
+  var tris = (data && data.trimestres) || [];
+  var box = document.getElementById('cb-trimestres');
+  if (!tris.length){ box.innerHTML = '<div style="color:var(--texte2);padding:12px;">Aucune donnée pour le moment.</div>'; return; }
+  var h = '';
+  tris.forEach(function(t){
+    var pastille = (!t.commence) ? '<span class="badge">à venir</span>'
+      : (t.nb_manquants === 0 ? '<span class="badge entente">Tous reçus ('+t.nb_recus+')</span>'
+                              : '<span class="badge retard">'+t.nb_manquants+' trou(s)</span>');
+    h += '<div class="carte" style="margin-bottom:10px;padding:12px 16px;">';
+    h += '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;cursor:pointer;" onclick="cbToggle(this)">';
+    h += '<div><strong>'+escapeHtmlP(t.titre)+'</strong> <span style="color:var(--texte2);font-size:13px;">— '+escapeHtmlP(t.periode)+'</span></div>'+pastille+'</div>';
+    h += '<div class="cb-detail" style="display:none;margin-top:8px;">';
+    (t.comptes || []).forEach(function(c){
+      h += '<div style="border-top:1px solid var(--bordure);padding:6px 0;"><div style="font-weight:700;">'+escapeHtmlP(c.nom)+'</div>';
+      (c.recus || []).forEach(function(rr){ h += '<div style="font-size:13px;color:#1a7f37;">✓ Relevé '+escapeHtmlP(rr)+'</div>'; });
+      (c.trous || []).forEach(function(tr){ h += '<div style="font-size:13px;color:#b91c1c;">✗ Manquant : aucun relevé du '+escapeHtmlP(tr)+'</div>'; });
+      if ((!c.trous || !c.trous.length) && c.a_des_releves){ h += '<div style="font-size:13px;color:#1a7f37;">Couverture complète ✓</div>'; }
+      else if (!c.recus || !c.recus.length){ h += '<div style="font-size:13px;color:#b91c1c;">Aucun relevé reçu ✗</div>'; }
+      h += '</div>';
+    });
+    h += '</div></div>';
+  });
+  box.innerHTML = h;
+}
+function cbToggle(hd){ var d = hd.parentNode.querySelector('.cb-detail'); if (d) d.style.display = (d.style.display === 'none' ? 'block' : 'none'); }
+function cbDeposer(ev){
+  ev.preventDefault();
+  var sel = document.getElementById('cb-compte');
+  var f = document.getElementById('cb-fichier');
+  var mois = document.getElementById('cb-mois').value || '';
+  var msg = document.getElementById('cb-msg');
+  function show(txt, err){ msg.textContent = txt; msg.className = 'msg' + (err ? ' err' : ''); msg.style.display = 'inline-block'; }
+  if (!sel.value){ show('Choisissez un compte.', true); return; }
+  if (!f.files || !f.files[0]){ show('Choisissez un fichier PDF.', true); return; }
+  var file = f.files[0];
+  if (file.size > 10 * 1024 * 1024){ show('Fichier trop gros (max 10 Mo).', true); return; }
+  var reader = new FileReader();
+  reader.onload = function(){
+    var b64 = String(reader.result).split(',')[1] || '';
+    show('Envoi…', false);
+    rpc('portail_deposer_releve', { cle: CLE, p_compte: sel.value, p_mois: mois, p_nom: file.name, p_contenu_b64: b64 }).then(function(r){
+      if (r && r.ok){ show('✓ Relevé déposé. Merci !', false); f.value = ''; }
+      else { show('Refusé — réessayez ou contactez le bureau.', true); }
+    }).catch(function(){ show('Erreur réseau — réessayez.', true); });
+  };
+  reader.readAsDataURL(file);
+}
 function basculerCarte(h){
   var c = h.nextElementSibling;
   if(!c) return;
