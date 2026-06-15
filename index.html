@@ -143,6 +143,7 @@ thead th .funnel.actif{opacity:1;color:var(--or-doux);}
     <button class="onglet" data-tab="ec">📒 État de compte fournisseurs</button>
     <button class="onglet" data-tab="bottin">👥 Bottin des employés</button>
     <button class="onglet" data-tab="cb">🏦 Comptes bancaires</button>
+    <button class="onglet" data-tab="cli">🗂️ Clients</button>
   </div>
 
   <!-- ====================== ONGLET FACTURES ====================== -->
@@ -270,6 +271,28 @@ thead th .funnel.actif{opacity:1;color:var(--or-doux);}
     <div id="cb-trimestres"><div style="color:var(--texte2);padding:12px;">Chargement…</div></div>
   </div>
 
+  <!-- ====================== ONGLET CLIENTS ====================== -->
+  <div id="tab-cli" class="tabpane">
+    <div class="bandeau">
+      ℹ️ Consultation de l'onglet <strong>Clients</strong> (lecture seule) : fiches, soumissions et facturation. Les données sont synchronisées depuis le bureau. Pour créer ou modifier, utilisez l'application au bureau.
+    </div>
+    <div class="sommaire">
+      <div class="kpi"><div class="l">Clients</div><div class="v" id="cli-kpi-nb">—</div></div>
+      <div class="kpi"><div class="l">Actifs</div><div class="v" id="cli-kpi-actifs">—</div></div>
+      <div class="kpi" style="border-left-color:var(--rouge);"><div class="l">Total à recevoir</div><div class="v" style="color:var(--rouge)" id="cli-kpi-recevoir">—</div></div>
+    </div>
+    <div class="carte">
+      <div class="carte-h" style="display:flex;justify-content:space-between;align-items:center;">
+        <span>🗂️ Clients — lecture seule</span>
+        <span class="compteur" id="cli-compteur"></span>
+      </div>
+      <div style="padding:14px 18px 0;">
+        <input type="search" id="rech-cli" class="recherche" style="margin:0 0 14px;" placeholder="🔍 Rechercher un client, un contact, un courriel…">
+      </div>
+      <div id="mount-cli" style="margin:0 18px 18px;"><div style="color:var(--texte2);padding:12px;">Chargement…</div></div>
+    </div>
+  </div>
+
   <div class="pied">Prestige Construction EA · Portail directeur (lecture seule) · Les actions sont transmises au comptable pour validation.</div>
   </div>
 </div>
@@ -335,13 +358,105 @@ document.querySelectorAll('.onglet').forEach(function(b){
     document.querySelectorAll('.onglet').forEach(function(x){ x.classList.remove('actif'); });
     b.classList.add('actif');
     var t = b.dataset.tab;
-    ['fact','bilan','bottin','ec','cb'].forEach(function(x){
+    ['fact','bilan','bottin','ec','cb','cli'].forEach(function(x){
       var p = document.getElementById('tab-'+x);
       if (p) p.classList.toggle('actif', x===t);
     });
     if (t === 'cb') cbInit();
+    if (t === 'cli') cliInit();
   };
 });
+
+/* ===== Clients : consultation (lecture seule) ===== */
+var CLI_LOADED = false, CLIENTS = [];
+function cliStatutBadge(s){
+  s = s || '';
+  var bg = 'var(--bordure)', co = 'var(--texte2)';
+  if (s === 'Payé' || s === 'Accepté') { bg = 'var(--vert-fond)'; co = 'var(--vert-tx)'; }
+  else if (s === 'Refusé') { bg = '#FDECEC'; co = 'var(--rouge)'; }
+  else if (s === 'Envoyé') { bg = 'var(--or-fond)'; co = '#8A5E1B'; }
+  if (!s) return '';
+  return '<span class="badge" style="background:'+bg+';color:'+co+';">'+escapeHtmlP(s)+'</span>';
+}
+function cliInit(){
+  if (CLI_LOADED) return;
+  CLI_LOADED = true;
+  rpc('portail_clients', { cle: CLE }).then(function(r){
+    if (!r || !r.ok){
+      CLI_LOADED = false;
+      document.getElementById('mount-cli').innerHTML =
+        '<div style="color:var(--rouge);padding:16px;">'+escapeHtmlP((r && r.erreur) || 'Erreur de chargement.')+'</div>';
+      return;
+    }
+    CLIENTS = r.clients || [];
+    rendreClients();
+  }).catch(function(){
+    CLI_LOADED = false;
+    document.getElementById('mount-cli').innerHTML =
+      '<div style="color:var(--rouge);padding:16px;">Erreur réseau — réessayez.</div>';
+  });
+  var rech = document.getElementById('rech-cli');
+  if (rech) rech.oninput = rendreClients;
+}
+function carteClient(c){
+  var coords = [];
+  if (c.contact)   coords.push('👤 '+escapeHtmlP(c.contact));
+  if (c.telephone) coords.push('📞 '+escapeHtmlP(c.telephone));
+  if (c.courriel)  coords.push('✉️ '+escapeHtmlP(c.courriel));
+  if (c.adresse)   coords.push('📍 '+escapeHtmlP(c.adresse));
+  if (c.neq)       coords.push('NEQ '+escapeHtmlP(c.neq));
+  var docs = (c.documents || []).map(function(d){
+    return '<tr>'
+      + '<td style="padding:6px 8px;border-top:1px solid var(--bordure);">'+escapeHtmlP(d.type)+'</td>'
+      + '<td style="padding:6px 8px;border-top:1px solid var(--bordure);">'+escapeHtmlP(d.numero || '—')+'</td>'
+      + '<td style="padding:6px 8px;border-top:1px solid var(--bordure);">'+(d.date || '—')+'</td>'
+      + '<td style="padding:6px 8px;border-top:1px solid var(--bordure);">'+cliStatutBadge(d.statut)+'</td>'
+      + '<td style="padding:6px 8px;border-top:1px solid var(--bordure);text-align:right;white-space:nowrap;">'+espNb(d.total)+' $</td>'
+      + '<td style="padding:6px 8px;border-top:1px solid var(--bordure);color:var(--texte2);">'+escapeHtmlP(d.objet || '')+'</td>'
+      + '</tr>';
+  }).join('');
+  if (!docs) docs = '<tr><td colspan="6" style="padding:10px 8px;color:var(--texte2);">Aucune soumission ni facture.</td></tr>';
+  var badgeActif = c.actif
+    ? '<span class="badge" style="background:var(--vert-fond);color:var(--vert-tx);">Actif</span>'
+    : '<span class="badge" style="background:var(--bordure);color:var(--texte2);">Inactif</span>';
+  return '<details style="border:1px solid var(--bordure);border-radius:12px;margin-bottom:10px;overflow:hidden;background:var(--blanc);">'
+    + '<summary style="list-style:none;cursor:pointer;padding:13px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">'
+      + '<span style="font-weight:800;font-size:15px;">'+escapeHtmlP(c.nom)+'</span>'
+      + badgeActif
+      + '<span style="color:var(--texte2);font-size:13px;">'+c.nb_soum+' soum. · '+c.nb_fact+' fact.</span>'
+      + '<span style="margin-left:auto;font-weight:700;color:var(--rouge);">À recevoir : '+espNb(c.reste_a_recevoir)+' $</span>'
+    + '</summary>'
+    + '<div style="padding:0 16px 14px;">'
+      + (coords.length ? '<div style="color:var(--texte2);font-size:13px;margin:2px 0 12px;display:flex;gap:16px;flex-wrap:wrap;">'+coords.join('')+'</div>' : '')
+      + '<div style="display:flex;gap:18px;flex-wrap:wrap;font-size:13px;margin-bottom:10px;">'
+        + '<span>Soumissionné : <b>'+espNb(c.total_soumissionne)+' $</b></span>'
+        + '<span>Facturé : <b>'+espNb(c.total_facture)+' $</b></span>'
+      + '</div>'
+      + '<div style="overflow:auto;"><table style="width:100%;border-collapse:collapse;font-size:13px;">'
+        + '<thead><tr style="text-align:left;color:var(--texte2);">'
+          + '<th style="padding:4px 8px;">Type</th><th style="padding:4px 8px;">Numéro</th>'
+          + '<th style="padding:4px 8px;">Date</th><th style="padding:4px 8px;">Statut</th>'
+          + '<th style="padding:4px 8px;text-align:right;">Montant</th><th style="padding:4px 8px;">Objet</th>'
+        + '</tr></thead><tbody>'+docs+'</tbody></table></div>'
+    + '</div>'
+  + '</details>';
+}
+function rendreClients(){
+  var rech = document.getElementById('rech-cli');
+  var q = ((rech && rech.value) || '').toLowerCase().trim();
+  var list = CLIENTS.filter(function(c){
+    if (!q) return true;
+    return ((c.nom||'')+' '+(c.contact||'')+' '+(c.courriel||'')+' '+(c.telephone||'')).toLowerCase().indexOf(q) >= 0;
+  });
+  document.getElementById('cli-kpi-nb').textContent = CLIENTS.length;
+  document.getElementById('cli-kpi-actifs').textContent = CLIENTS.filter(function(c){ return c.actif; }).length;
+  var tr = 0; CLIENTS.forEach(function(c){ tr += Number(c.reste_a_recevoir || 0); });
+  document.getElementById('cli-kpi-recevoir').textContent = espNb(tr) + ' $';
+  document.getElementById('cli-compteur').textContent = list.length + ' client' + (list.length > 1 ? 's' : '');
+  var m = document.getElementById('mount-cli');
+  if (!list.length){ m.innerHTML = '<div style="color:var(--texte2);padding:18px;text-align:center;">Aucun client trouvé.</div>'; return; }
+  m.innerHTML = list.map(carteClient).join('');
+}
 
 /* ===== Comptes bancaires : dépôt de relevés + relevés reçus/manquants ===== */
 var CB_LOADED = false;
