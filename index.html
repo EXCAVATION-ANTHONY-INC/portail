@@ -124,6 +124,16 @@ thead th .funnel.actif{opacity:1;color:var(--or-doux);}
 #funnel-menu .fm-act{margin-top:8px;text-align:right;border-top:1px solid #eee;padding-top:8px;}
 #funnel-menu .fm-eff{padding:5px 10px;border:1px solid var(--bordure);background:#f8f9fa;border-radius:6px;cursor:pointer;font-size:12px;font-family:inherit;}
 #chargement-page{padding:60px 20px;text-align:center;color:var(--texte2);font-size:15px;}
+.cli-layout{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;margin-top:14px;}
+.cli-side{display:flex;flex-direction:column;gap:6px;min-width:190px;flex:0 0 auto;background:var(--blanc);border:1px solid var(--bordure);border-radius:14px;box-shadow:var(--ombre);padding:10px;position:sticky;top:10px;}
+.cli-nav{text-align:left;padding:11px 14px;border:none;background:none;border-radius:9px;font-family:inherit;font-size:14px;font-weight:600;color:var(--texte2);cursor:pointer;}
+.cli-nav:hover{background:var(--fond);color:var(--texte);}
+.cli-nav.actif{background:var(--graphite);color:#fff;}
+.cli-content{flex:1;min-width:280px;}
+.doc-tbl{width:100%;border-collapse:collapse;font-size:13px;}
+.doc-tbl th{text-align:left;color:var(--texte2);font-weight:700;padding:7px 8px;border-bottom:2px solid var(--bordure);white-space:nowrap;}
+.doc-tbl td{padding:7px 8px;border-bottom:1px solid var(--bordure);}
+@media(max-width:680px){.cli-side{flex-direction:row;flex-wrap:wrap;width:100%;position:static;}.cli-nav{flex:1;text-align:center;}}
 </style>
 </head>
 <body>
@@ -274,22 +284,68 @@ thead th .funnel.actif{opacity:1;color:var(--or-doux);}
   <!-- ====================== ONGLET CLIENTS ====================== -->
   <div id="tab-cli" class="tabpane">
     <div class="bandeau">
-      ℹ️ Consultation de l'onglet <strong>Clients</strong> (lecture seule) : fiches, soumissions et facturation. Les données sont synchronisées depuis le bureau. Pour créer ou modifier, utilisez l'application au bureau.
+      ℹ️ Onglet <strong>Clients</strong> : fiches, soumissions et facturation, synchronisés depuis le bureau. Utilisez la barre de gauche pour naviguer.
     </div>
-    <div class="sommaire">
-      <div class="kpi"><div class="l">Clients</div><div class="v" id="cli-kpi-nb">—</div></div>
-      <div class="kpi"><div class="l">Actifs</div><div class="v" id="cli-kpi-actifs">—</div></div>
-      <div class="kpi" style="border-left-color:var(--rouge);"><div class="l">Total à recevoir</div><div class="v" style="color:var(--rouge)" id="cli-kpi-recevoir">—</div></div>
-    </div>
-    <div class="carte">
-      <div class="carte-h" style="display:flex;justify-content:space-between;align-items:center;">
-        <span>🗂️ Clients — lecture seule</span>
-        <span class="compteur" id="cli-compteur"></span>
+    <div class="cli-layout">
+      <!-- Barre latérale -->
+      <div class="cli-side">
+        <button class="cli-nav actif" data-cli="fiches" onclick="cliSection('fiches')">📋 Fiches clients</button>
+        <button class="cli-nav" data-cli="soum" onclick="cliSection('soum')">📄 Soumissions</button>
+        <button class="cli-nav" data-cli="fact" onclick="cliSection('fact')">🧾 Facturation</button>
       </div>
-      <div style="padding:14px 18px 0;">
-        <input type="search" id="rech-cli" class="recherche" style="margin:0 0 14px;" placeholder="🔍 Rechercher un client, un contact, un courriel…">
+      <!-- Contenu -->
+      <div class="cli-content">
+        <!-- Section Fiches -->
+        <div id="cli-sec-fiches" class="cli-sec">
+          <div class="sommaire">
+            <div class="kpi"><div class="l">Clients</div><div class="v" id="cli-kpi-nb">—</div></div>
+            <div class="kpi"><div class="l">Actifs</div><div class="v" id="cli-kpi-actifs">—</div></div>
+            <div class="kpi" style="border-left-color:var(--rouge);"><div class="l">Total à recevoir</div><div class="v" style="color:var(--rouge)" id="cli-kpi-recevoir">—</div></div>
+          </div>
+          <div class="carte">
+            <div class="carte-h" style="display:flex;justify-content:space-between;align-items:center;">
+              <span>📋 Fiches clients</span><span class="compteur" id="cli-compteur"></span>
+            </div>
+            <div style="padding:14px 18px 0;">
+              <input type="search" id="rech-cli" class="recherche" style="margin:0 0 14px;" placeholder="🔍 Rechercher un client, un contact, un courriel…">
+            </div>
+            <div id="mount-cli" style="margin:0 18px 18px;"><div style="color:var(--texte2);padding:12px;">Chargement…</div></div>
+          </div>
+        </div>
+        <!-- Section Soumissions -->
+        <div id="cli-sec-soum" class="cli-sec" style="display:none;">
+          <div class="sommaire">
+            <div class="kpi"><div class="l">Soumissions</div><div class="v" id="soum-kpi-nb">—</div></div>
+            <div class="kpi" style="border-left-color:var(--or);"><div class="l">Montant soumissionné</div><div class="v" style="color:var(--or)" id="soum-kpi-total">—</div></div>
+          </div>
+          <div class="carte">
+            <div class="carte-h" style="display:flex;justify-content:space-between;align-items:center;">
+              <span>📄 Soumissions &amp; estimations</span><span class="compteur" id="soum-compteur"></span>
+            </div>
+            <div style="padding:14px 18px 0;">
+              <input type="search" id="rech-soum" class="recherche" style="margin:0 0 14px;" placeholder="🔍 Rechercher (client, numéro, objet)…">
+            </div>
+            <div id="mount-soum" style="margin:0 18px 18px;overflow:auto;"></div>
+          </div>
+        </div>
+        <!-- Section Facturation -->
+        <div id="cli-sec-fact" class="cli-sec" style="display:none;">
+          <div class="sommaire">
+            <div class="kpi"><div class="l">Factures</div><div class="v" id="fact-kpi-nb">—</div></div>
+            <div class="kpi"><div class="l">Total facturé</div><div class="v" id="fact-kpi-total">—</div></div>
+            <div class="kpi" style="border-left-color:var(--rouge);"><div class="l">Non payé (à recevoir)</div><div class="v" style="color:var(--rouge)" id="fact-kpi-reste">—</div></div>
+          </div>
+          <div class="carte">
+            <div class="carte-h" style="display:flex;justify-content:space-between;align-items:center;">
+              <span>🧾 Facturation</span><span class="compteur" id="fact-compteur"></span>
+            </div>
+            <div style="padding:14px 18px 0;">
+              <input type="search" id="rech-fact" class="recherche" style="margin:0 0 14px;" placeholder="🔍 Rechercher (client, numéro, objet)…">
+            </div>
+            <div id="mount-fact" style="margin:0 18px 18px;overflow:auto;"></div>
+          </div>
+        </div>
       </div>
-      <div id="mount-cli" style="margin:0 18px 18px;"><div style="color:var(--texte2);padding:12px;">Chargement…</div></div>
     </div>
   </div>
 
@@ -368,7 +424,16 @@ document.querySelectorAll('.onglet').forEach(function(b){
 });
 
 /* ===== Clients : consultation (lecture seule) ===== */
-var CLI_LOADED = false, CLIENTS = [];
+var CLI_LOADED = false, CLIENTS = [], DOCS = [];
+function cliSection(name){
+  ['fiches','soum','fact'].forEach(function(x){
+    var sec = document.getElementById('cli-sec-'+x);
+    if (sec) sec.style.display = (x === name ? '' : 'none');
+  });
+  document.querySelectorAll('.cli-nav').forEach(function(b){
+    b.classList.toggle('actif', b.dataset.cli === name);
+  });
+}
 function cliStatutBadge(s){
   s = s || '';
   var bg = 'var(--bordure)', co = 'var(--texte2)';
@@ -389,14 +454,16 @@ function cliInit(){
       return;
     }
     CLIENTS = r.clients || [];
-    rendreClients();
+    DOCS = r.documents || [];
+    rendreClients(); rendreSoum(); rendreFact();
   }).catch(function(){
     CLI_LOADED = false;
     document.getElementById('mount-cli').innerHTML =
       '<div style="color:var(--rouge);padding:16px;">Erreur réseau — réessayez.</div>';
   });
-  var rech = document.getElementById('rech-cli');
-  if (rech) rech.oninput = rendreClients;
+  var r1 = document.getElementById('rech-cli');  if (r1) r1.oninput = rendreClients;
+  var r2 = document.getElementById('rech-soum'); if (r2) r2.oninput = rendreSoum;
+  var r3 = document.getElementById('rech-fact'); if (r3) r3.oninput = rendreFact;
 }
 function carteClient(c){
   var coords = [];
@@ -456,6 +523,54 @@ function rendreClients(){
   var m = document.getElementById('mount-cli');
   if (!list.length){ m.innerHTML = '<div style="color:var(--texte2);padding:18px;text-align:center;">Aucun client trouvé.</div>'; return; }
   m.innerHTML = list.map(carteClient).join('');
+}
+/* ----- Vues Soumissions / Facturation (tous les documents) ----- */
+function ligneDoc(d){
+  return '<tr>'
+    + '<td><b>' + escapeHtmlP(d.client || '—') + '</b></td>'
+    + '<td>' + escapeHtmlP(d.type) + '</td>'
+    + '<td>' + escapeHtmlP(d.numero || '—') + '</td>'
+    + '<td>' + (d.date || '—') + '</td>'
+    + '<td>' + cliStatutBadge(d.statut) + '</td>'
+    + '<td style="text-align:right;white-space:nowrap;">' + espNb(d.total) + ' $</td>'
+    + '<td style="color:var(--texte2);">' + escapeHtmlP(d.objet || '') + '</td>'
+    + '</tr>';
+}
+function tableDocs(rows){
+  if (!rows.length) return '<div style="color:var(--texte2);padding:16px;text-align:center;">Aucun document.</div>';
+  return '<table class="doc-tbl"><thead><tr><th>Client</th><th>Type</th><th>Numéro</th><th>Date</th>'
+    + '<th>Statut</th><th style="text-align:right;">Montant</th><th>Objet</th></tr></thead><tbody>'
+    + rows.map(ligneDoc).join('') + '</tbody></table>';
+}
+function filtreDocs(types, q){
+  q = (q || '').toLowerCase().trim();
+  return DOCS.filter(function(d){
+    if (types.indexOf(d.type) < 0) return false;
+    if (!q) return true;
+    return ((d.client||'')+' '+(d.numero||'')+' '+(d.objet||'')+' '+(d.statut||'')).toLowerCase().indexOf(q) >= 0;
+  });
+}
+function rendreSoum(){
+  var qel = document.getElementById('rech-soum');
+  var all = filtreDocs(['SOUMISSION','ESTIMATION'], '');
+  var list = filtreDocs(['SOUMISSION','ESTIMATION'], qel ? qel.value : '');
+  var tot = 0; all.forEach(function(d){ tot += Number(d.total||0); });
+  document.getElementById('soum-kpi-nb').textContent = all.length;
+  document.getElementById('soum-kpi-total').textContent = espNb(tot) + ' $';
+  document.getElementById('soum-compteur').textContent = list.length + ' document' + (list.length>1?'s':'');
+  document.getElementById('mount-soum').innerHTML = tableDocs(list);
+}
+function rendreFact(){
+  var qel = document.getElementById('rech-fact');
+  var all = filtreDocs(['FACTURE','ETAT_COMPTE'], '');
+  var list = filtreDocs(['FACTURE','ETAT_COMPTE'], qel ? qel.value : '');
+  var tot = 0, reste = 0;
+  all.forEach(function(d){ tot += Number(d.total||0); if ((d.statut||'') !== 'Payé') reste += Number(d.total||0); });
+  document.getElementById('fact-kpi-nb').textContent = all.length;
+  document.getElementById('fact-kpi-total').textContent = espNb(tot) + ' $';
+  document.getElementById('fact-kpi-reste').textContent = espNb(reste) + ' $';
+  document.getElementById('fact-compteur').textContent = list.length + ' document' + (list.length>1?'s':'');
+  document.getElementById('mount-fact').innerHTML = tableDocs(list);
 }
 
 /* ===== Comptes bancaires : dépôt de relevés + relevés reçus/manquants ===== */
