@@ -134,6 +134,14 @@ thead th .funnel.actif{opacity:1;color:var(--or-doux);}
 .doc-tbl th{text-align:left;color:var(--texte2);font-weight:700;padding:7px 8px;border-bottom:2px solid var(--bordure);white-space:nowrap;}
 .doc-tbl td{padding:7px 8px;border-bottom:1px solid var(--bordure);}
 @media(max-width:680px){.cli-side{flex-direction:row;flex-wrap:wrap;width:100%;position:static;}.cli-nav{flex:1;text-align:center;}}
+.modal-ov{display:none;position:fixed;inset:0;background:rgba(7,16,24,.5);z-index:9500;justify-content:center;align-items:flex-start;overflow:auto;padding:28px 14px;}
+.modal-ov.show{display:flex;}
+.modal-bx{background:#fff;border-radius:16px;width:100%;box-shadow:0 24px 70px rgba(0,0,0,.35);}
+.modal-h{padding:16px 20px;border-bottom:1px solid var(--bordure);display:flex;justify-content:space-between;align-items:center;}
+.modal-h strong{font-size:17px;}
+.modal-x{background:none;border:none;font-size:22px;cursor:pointer;color:var(--texte2);line-height:1;}
+.modal-f{padding:14px 20px;border-top:1px solid var(--bordure);display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+.lbl{font-weight:700;font-size:13px;color:var(--texte);}
 </style>
 </head>
 <body>
@@ -306,10 +314,11 @@ thead th .funnel.actif{opacity:1;color:var(--or-doux);}
             <div class="carte-h" style="display:flex;justify-content:space-between;align-items:center;">
               <span>📋 Fiches clients</span><span class="compteur" id="cli-compteur"></span>
             </div>
-            <div style="padding:14px 18px 0;">
-              <input type="search" id="rech-cli" class="recherche" style="margin:0 0 14px;" placeholder="🔍 Rechercher un client, un contact, un courriel…">
+            <div style="padding:14px 18px 0;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+              <button class="btn btn-or" onclick="openClientModal(null)">➕ Nouveau client</button>
+              <input type="search" id="rech-cli" class="recherche" style="margin:0;flex:1;min-width:180px;" placeholder="🔍 Rechercher un client, un contact, un courriel…">
             </div>
-            <div id="mount-cli" style="margin:0 18px 18px;"><div style="color:var(--texte2);padding:12px;">Chargement…</div></div>
+            <div id="mount-cli" style="margin:14px 18px 18px;"><div style="color:var(--texte2);padding:12px;">Chargement…</div></div>
           </div>
         </div>
         <!-- Section Soumissions -->
@@ -322,10 +331,11 @@ thead th .funnel.actif{opacity:1;color:var(--or-doux);}
             <div class="carte-h" style="display:flex;justify-content:space-between;align-items:center;">
               <span>📄 Soumissions &amp; estimations</span><span class="compteur" id="soum-compteur"></span>
             </div>
-            <div style="padding:14px 18px 0;">
-              <input type="search" id="rech-soum" class="recherche" style="margin:0 0 14px;" placeholder="🔍 Rechercher (client, numéro, objet)…">
+            <div style="padding:14px 18px 0;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+              <button class="btn btn-or" onclick="openDocModal(null,'SOUMISSION')">➕ Nouvelle soumission</button>
+              <input type="search" id="rech-soum" class="recherche" style="margin:0;flex:1;min-width:180px;" placeholder="🔍 Rechercher (client, numéro, objet)…">
             </div>
-            <div id="mount-soum" style="margin:0 18px 18px;overflow:auto;"></div>
+            <div id="mount-soum" style="margin:14px 18px 18px;overflow:auto;"></div>
           </div>
         </div>
         <!-- Section Facturation -->
@@ -339,10 +349,11 @@ thead th .funnel.actif{opacity:1;color:var(--or-doux);}
             <div class="carte-h" style="display:flex;justify-content:space-between;align-items:center;">
               <span>🧾 Facturation</span><span class="compteur" id="fact-compteur"></span>
             </div>
-            <div style="padding:14px 18px 0;">
-              <input type="search" id="rech-fact" class="recherche" style="margin:0 0 14px;" placeholder="🔍 Rechercher (client, numéro, objet)…">
+            <div style="padding:14px 18px 0;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+              <button class="btn btn-or" onclick="openDocModal(null,'FACTURE')">➕ Nouvelle facture</button>
+              <input type="search" id="rech-fact" class="recherche" style="margin:0;flex:1;min-width:180px;" placeholder="🔍 Rechercher (client, numéro, objet)…">
             </div>
-            <div id="mount-fact" style="margin:0 18px 18px;overflow:auto;"></div>
+            <div id="mount-fact" style="margin:14px 18px 18px;overflow:auto;"></div>
           </div>
         </div>
       </div>
@@ -391,6 +402,79 @@ thead th .funnel.actif{opacity:1;color:var(--or-doux);}
     <button type="button" onclick="fermerPdf()" style="background:none;border:none;color:#fff;font-size:24px;cursor:pointer;line-height:1;">✕</button>
   </div>
   <iframe id="pdf-frame" src="" title="Facture" style="flex:1;border:none;width:100%;background:#525659;"></iframe>
+</div>
+
+<!-- ============ MODALE FICHE CLIENT ============ -->
+<div id="modal-client" class="modal-ov">
+  <div class="modal-bx" style="max-width:580px;">
+    <div class="modal-h"><strong id="mc-titre">Nouveau client</strong>
+      <button class="modal-x" onclick="closeModal('modal-client')">✕</button></div>
+    <div style="padding:18px 20px;display:grid;gap:12px;">
+      <div><label class="lbl">Nom *</label><input id="mc-nom" class="recherche" style="margin:4px 0 0;"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div><label class="lbl">Personne contact</label><input id="mc-contact" class="recherche" style="margin:4px 0 0;"></div>
+        <div><label class="lbl">Téléphone</label><input id="mc-tel" class="recherche" style="margin:4px 0 0;"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div><label class="lbl">Courriel</label><input id="mc-courriel" class="recherche" style="margin:4px 0 0;"></div>
+        <div><label class="lbl">NEQ</label><input id="mc-neq" class="recherche" style="margin:4px 0 0;"></div>
+      </div>
+      <div><label class="lbl">Adresse</label><input id="mc-adresse" class="recherche" style="margin:4px 0 0;"></div>
+      <div><label class="lbl">Notes</label><textarea id="mc-notes" class="recherche" style="margin:4px 0 0;min-height:56px;"></textarea></div>
+      <label style="display:flex;gap:8px;align-items:center;font-weight:700;"><input type="checkbox" id="mc-actif" checked style="width:17px;height:17px;"> Client actif</label>
+    </div>
+    <div class="modal-f">
+      <button class="btn btn-or" onclick="saveClient()">💾 Enregistrer</button>
+      <button class="btn" style="background:#fff;border:1px solid var(--bordure);" onclick="closeModal('modal-client')">Annuler</button>
+      <span id="mc-msg" style="font-size:13px;font-weight:600;"></span>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODALE SOUMISSION / FACTURE ============ -->
+<div id="modal-doc" class="modal-ov">
+  <div class="modal-bx" style="max-width:780px;">
+    <div class="modal-h"><strong id="md-titre">Nouvelle soumission</strong>
+      <button class="modal-x" onclick="closeModal('modal-doc')">✕</button></div>
+    <div style="padding:18px 20px;display:grid;gap:12px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div><label class="lbl">Type</label>
+          <select id="md-type" class="recherche" style="margin:4px 0 0;">
+            <option value="SOUMISSION">Soumission</option><option value="ESTIMATION">Estimation</option>
+            <option value="FACTURE">Facture</option><option value="ETAT_COMPTE">État de compte</option>
+          </select></div>
+        <div><label class="lbl">Client *</label><select id="md-client" class="recherche" style="margin:4px 0 0;"></select></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+        <div><label class="lbl">Numéro</label><input id="md-numero" class="recherche" style="margin:4px 0 0;" placeholder="ex. SOUM-2026-001"></div>
+        <div><label class="lbl">Date</label><input type="date" id="md-date" class="recherche" style="margin:4px 0 0;"></div>
+        <div><label class="lbl">Statut</label>
+          <select id="md-statut" class="recherche" style="margin:4px 0 0;">
+            <option>Brouillon</option><option>Envoyé</option><option>Accepté</option><option>Refusé</option><option>Payé</option>
+          </select></div>
+      </div>
+      <div><label class="lbl">Objet</label><input id="md-objet" class="recherche" style="margin:4px 0 0;" placeholder="ex. Rénovation salle de bain"></div>
+      <div>
+        <label class="lbl">Lignes (description, quantité, prix)</label>
+        <div style="overflow:auto;"><table class="doc-tbl" style="margin-top:4px;">
+          <thead><tr><th>Description</th><th style="width:80px;">Qté</th><th style="width:110px;">Prix ($)</th><th style="width:110px;text-align:right;">Montant</th><th style="width:34px;"></th></tr></thead>
+          <tbody id="md-lignes"></tbody>
+        </table></div>
+        <button class="btn" style="background:#fff;border:1px solid var(--bordure);margin-top:8px;font-size:13px;padding:7px 12px;" onclick="docAddLigne()">+ Ajouter une ligne</button>
+      </div>
+      <div style="display:flex;gap:18px;flex-wrap:wrap;justify-content:flex-end;font-size:14px;border-top:1px solid var(--bordure);padding-top:12px;">
+        <span>Sous-total : <b id="md-st">0.00 $</b></span>
+        <span>TPS (5%) : <b id="md-tps">0.00 $</b></span>
+        <span>TVQ (9.975%) : <b id="md-tvq">0.00 $</b></span>
+        <span style="color:var(--or);">Total : <b id="md-total">0.00 $</b></span>
+      </div>
+    </div>
+    <div class="modal-f">
+      <button class="btn btn-or" onclick="saveDoc()">💾 Enregistrer</button>
+      <button class="btn" style="background:#fff;border:1px solid var(--bordure);" onclick="closeModal('modal-doc')">Annuler</button>
+      <span id="md-msg" style="font-size:13px;font-weight:600;"></span>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -492,6 +576,7 @@ function carteClient(c){
       + badgeActif
       + '<span style="color:var(--texte2);font-size:13px;">'+c.nb_soum+' soum. · '+c.nb_fact+' fact.</span>'
       + '<span style="margin-left:auto;font-weight:700;color:var(--rouge);">À recevoir : '+espNb(c.reste_a_recevoir)+' $</span>'
+      + '<button onclick="event.preventDefault();event.stopPropagation();openClientModal('+c.cid+')" style="border:1px solid var(--bordure);background:var(--blanc);border-radius:8px;padding:6px 11px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">✏️ Modifier</button>'
     + '</summary>'
     + '<div style="padding:0 16px 14px;">'
       + (coords.length ? '<div style="color:var(--texte2);font-size:13px;margin:2px 0 12px;display:flex;gap:16px;flex-wrap:wrap;">'+coords.join('')+'</div>' : '')
@@ -534,12 +619,13 @@ function ligneDoc(d){
     + '<td>' + cliStatutBadge(d.statut) + '</td>'
     + '<td style="text-align:right;white-space:nowrap;">' + espNb(d.total) + ' $</td>'
     + '<td style="color:var(--texte2);">' + escapeHtmlP(d.objet || '') + '</td>'
+    + '<td style="text-align:center;"><button onclick="openDocModal('+d.id+')" style="border:1px solid var(--bordure);background:var(--blanc);border-radius:8px;padding:5px 9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">✏️</button></td>'
     + '</tr>';
 }
 function tableDocs(rows){
   if (!rows.length) return '<div style="color:var(--texte2);padding:16px;text-align:center;">Aucun document.</div>';
   return '<table class="doc-tbl"><thead><tr><th>Client</th><th>Type</th><th>Numéro</th><th>Date</th>'
-    + '<th>Statut</th><th style="text-align:right;">Montant</th><th>Objet</th></tr></thead><tbody>'
+    + '<th>Statut</th><th style="text-align:right;">Montant</th><th>Objet</th><th></th></tr></thead><tbody>'
     + rows.map(ligneDoc).join('') + '</tbody></table>';
 }
 function filtreDocs(types, q){
@@ -571,6 +657,118 @@ function rendreFact(){
   document.getElementById('fact-kpi-reste').textContent = espNb(reste) + ' $';
   document.getElementById('fact-compteur').textContent = list.length + ' document' + (list.length>1?'s':'');
   document.getElementById('mount-fact').innerHTML = tableDocs(list);
+}
+
+/* ===== Édition (file appliquée au bureau à la prochaine synchro ~15 min) ===== */
+var EDIT_CID = null, EDIT_DID = null;
+function showModal(id){ document.getElementById(id).classList.add('show'); }
+function closeModal(id){ document.getElementById(id).classList.remove('show'); }
+function rpcModif(cible, action, ref_id, donnees){
+  return rpc('portail_enregistrer_modif', { cle: CLE, p_cible: cible, p_action: action, p_ref_id: ref_id, p_donnees: donnees });
+}
+function toastEdit(elId, ok, msg){
+  var e = document.getElementById(elId);
+  e.style.color = ok ? 'var(--vert-tx)' : 'var(--rouge)';
+  e.textContent = msg;
+}
+function valOf(id){ var e=document.getElementById(id); return e ? e.value : ''; }
+/* --- Fiche client --- */
+function openClientModal(cid){
+  EDIT_CID = cid;
+  var c = cid ? CLIENTS.filter(function(x){ return x.cid === cid; })[0] : null;
+  document.getElementById('mc-titre').textContent = c ? ('Modifier — ' + c.nom) : 'Nouveau client';
+  document.getElementById('mc-nom').value = c ? (c.nom || '') : '';
+  document.getElementById('mc-contact').value = c ? (c.contact || '') : '';
+  document.getElementById('mc-tel').value = c ? (c.telephone || '') : '';
+  document.getElementById('mc-courriel').value = c ? (c.courriel || '') : '';
+  document.getElementById('mc-neq').value = c ? (c.neq || '') : '';
+  document.getElementById('mc-adresse').value = c ? (c.adresse || '') : '';
+  document.getElementById('mc-notes').value = c ? (c.notes || '') : '';
+  document.getElementById('mc-actif').checked = c ? !!c.actif : true;
+  toastEdit('mc-msg', true, '');
+  showModal('modal-client');
+}
+function saveClient(){
+  var nom = (valOf('mc-nom') || '').trim();
+  if (!nom){ toastEdit('mc-msg', false, 'Le nom est obligatoire.'); return; }
+  var data = { nom: nom, contact: valOf('mc-contact'), telephone: valOf('mc-tel'),
+    courriel: valOf('mc-courriel'), neq: valOf('mc-neq'), adresse: valOf('mc-adresse'),
+    notes: valOf('mc-notes'), actif: document.getElementById('mc-actif').checked };
+  toastEdit('mc-msg', true, 'Envoi…');
+  rpcModif('CLIENT', EDIT_CID ? 'UPDATE' : 'CREATE', EDIT_CID, data).then(function(r){
+    if (r && r.ok){ toastEdit('mc-msg', true, '✅ Enregistré — appliqué au bureau d’ici ~15 min.'); setTimeout(function(){ closeModal('modal-client'); }, 1700); }
+    else toastEdit('mc-msg', false, (r && r.erreur) || 'Erreur — réessayez.');
+  }).catch(function(){ toastEdit('mc-msg', false, 'Erreur réseau — réessayez.'); });
+}
+/* --- Soumission / facture --- */
+function docOptionsClients(sel){
+  var opts = '<option value="">— Choisir un client —</option>';
+  CLIENTS.slice().sort(function(a,b){ return (a.nom||'').localeCompare(b.nom||''); }).forEach(function(c){
+    opts += '<option value="'+c.cid+'"'+(sel===c.cid?' selected':'')+'>'+escapeHtmlP(c.nom)+'</option>';
+  });
+  return opts;
+}
+function docLigneRow(d){
+  d = d || {};
+  return '<tr>'
+   + '<td><input class="ml-desc recherche" style="margin:0;" value="'+escapeHtmlP(d.description||'')+'"></td>'
+   + '<td><input class="ml-qte recherche" style="margin:0;text-align:right;" type="number" step="any" value="'+(d.quantite!=null?d.quantite:'')+'" oninput="docTotals()"></td>'
+   + '<td><input class="ml-prix recherche" style="margin:0;text-align:right;" type="number" step="any" value="'+(d.prix!=null?d.prix:'')+'" oninput="docTotals()"></td>'
+   + '<td class="ml-mt" style="text-align:right;white-space:nowrap;">0.00 $</td>'
+   + '<td style="text-align:center;"><button onclick="this.closest(\'tr\').remove();docTotals();" style="border:none;background:none;cursor:pointer;color:var(--rouge);font-size:16px;">✕</button></td>'
+   + '</tr>';
+}
+function docAddLigne(d){ document.getElementById('md-lignes').insertAdjacentHTML('beforeend', docLigneRow(d)); docTotals(); }
+function docTotals(){
+  var st = 0;
+  document.querySelectorAll('#md-lignes tr').forEach(function(tr){
+    var q = parseFloat(tr.querySelector('.ml-qte').value) || 0;
+    var p = parseFloat(tr.querySelector('.ml-prix').value) || 0;
+    var m = q * p; st += m;
+    tr.querySelector('.ml-mt').textContent = espNb(m) + ' $';
+  });
+  var tps = st * 0.05, tvq = st * 0.09975;
+  document.getElementById('md-st').textContent = espNb(st) + ' $';
+  document.getElementById('md-tps').textContent = espNb(tps) + ' $';
+  document.getElementById('md-tvq').textContent = espNb(tvq) + ' $';
+  document.getElementById('md-total').textContent = espNb(st + tps + tvq) + ' $';
+}
+function openDocModal(did, forceType){
+  EDIT_DID = did;
+  var d = did ? DOCS.filter(function(x){ return x.id === did; })[0] : null;
+  var type = d ? d.type : (forceType || 'SOUMISSION');
+  var estFact = (type === 'FACTURE' || type === 'ETAT_COMPTE');
+  document.getElementById('md-titre').textContent = d ? ('Modifier — ' + (d.numero || d.type)) : (estFact ? 'Nouvelle facture' : 'Nouvelle soumission');
+  document.getElementById('md-type').value = type;
+  document.getElementById('md-client').innerHTML = docOptionsClients(d ? d.client_id : null);
+  document.getElementById('md-numero').value = d ? (d.numero || '') : '';
+  document.getElementById('md-date').value = d ? (d.date || '') : (TODAY || new Date().toISOString().slice(0,10));
+  document.getElementById('md-statut').value = d ? (d.statut || 'Brouillon') : 'Brouillon';
+  document.getElementById('md-objet').value = d ? (d.objet || '') : '';
+  var body = document.getElementById('md-lignes'); body.innerHTML = '';
+  var lignes = (d && d.lignes && d.lignes.length) ? d.lignes : [{}];
+  lignes.forEach(function(L){ body.insertAdjacentHTML('beforeend', docLigneRow(L)); });
+  docTotals();
+  toastEdit('md-msg', true, '');
+  showModal('modal-doc');
+}
+function saveDoc(){
+  var cid = valOf('md-client');
+  if (!cid){ toastEdit('md-msg', false, 'Choisissez un client.'); return; }
+  var lignes = [];
+  document.querySelectorAll('#md-lignes tr').forEach(function(tr){
+    var desc = (tr.querySelector('.ml-desc').value || '').trim();
+    var q = parseFloat(tr.querySelector('.ml-qte').value) || 0;
+    var p = parseFloat(tr.querySelector('.ml-prix').value) || 0;
+    if (desc || q || p) lignes.push({ description: desc, quantite: q, prix: p });
+  });
+  var data = { type: valOf('md-type'), client_id: parseInt(cid, 10), numero: valOf('md-numero'),
+    date: valOf('md-date'), statut: valOf('md-statut'), objet: valOf('md-objet'), lignes: lignes };
+  toastEdit('md-msg', true, 'Envoi…');
+  rpcModif('DOCUMENT', EDIT_DID ? 'UPDATE' : 'CREATE', EDIT_DID, data).then(function(r){
+    if (r && r.ok){ toastEdit('md-msg', true, '✅ Enregistré — appliqué au bureau d’ici ~15 min.'); setTimeout(function(){ closeModal('modal-doc'); }, 1700); }
+    else toastEdit('md-msg', false, (r && r.erreur) || 'Erreur — réessayez.');
+  }).catch(function(){ toastEdit('md-msg', false, 'Erreur réseau — réessayez.'); });
 }
 
 /* ===== Comptes bancaires : dépôt de relevés + relevés reçus/manquants ===== */
