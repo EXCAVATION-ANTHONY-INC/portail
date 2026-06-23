@@ -110,7 +110,7 @@ body.avec-pdf .wrap{max-width:none;margin:0;padding-right:calc(50vw + 24px);}
 #mount-bottin th:nth-child(4),#mount-bottin td:nth-child(4){width:13%;}
 #mount-bottin th:nth-child(5),#mount-bottin td:nth-child(5){width:24%;}
 #mount-bottin th:nth-child(6),#mount-bottin td:nth-child(6){width:12%;}
-thead th .lbl{cursor:pointer;user-select:none;}
+thead th .lbl{cursor:pointer;user-select:none;color:#fff;}
 thead th .fl{opacity:.4;font-size:10px;margin-left:4px;}
 thead th .funnel{cursor:pointer;opacity:.5;font-size:11px;margin-left:5px;}
 thead th .funnel:hover{opacity:1;}
@@ -292,7 +292,7 @@ thead th .funnel.actif{opacity:1;color:var(--or-doux);}
   <!-- ====================== ONGLET CLIENTS ====================== -->
   <div id="tab-cli" class="tabpane">
     <div class="bandeau">
-      ℹ️ Onglet <strong>Clients</strong> : fiches, soumissions et facturation, synchronisés depuis le bureau. Utilisez la barre de gauche pour naviguer.
+      ✏️ Onglet <strong>Clients modifiable</strong> : créez et modifiez fiches clients, soumissions et factures. Vos changements sont appliqués automatiquement à l'app du bureau à la prochaine synchronisation (~15 min).
     </div>
     <div class="cli-layout">
       <!-- Barre latérale -->
@@ -351,7 +351,26 @@ thead th .funnel.actif{opacity:1;color:var(--or-doux);}
             </div>
             <div style="padding:14px 18px 0;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
               <button class="btn btn-or" onclick="openDocModal(null,'FACTURE')">➕ Nouvelle facture</button>
+              <button class="btn" style="background:#fff;border:1px solid var(--bordure);" onclick="openDocModal(null,'ETAT_COMPTE')">➕ État de compte</button>
               <input type="search" id="rech-fact" class="recherche" style="margin:0;flex:1;min-width:180px;" placeholder="🔍 Rechercher (client, numéro, objet)…">
+            </div>
+            <!-- Importer un PDF : analysé par le bureau à la prochaine synchro -->
+            <div style="margin:12px 18px 0;padding:13px 15px;border:1px dashed var(--bordure);border-radius:12px;background:var(--or-fond,#fbf3e4);">
+              <div style="font-weight:800;font-size:13px;margin-bottom:4px;">📥 Importer un PDF pour créer une facture</div>
+              <div style="color:var(--texte2);font-size:12px;margin-bottom:10px;">Déposez une soumission ou une facture déjà faite (PDF). Le bureau la lit automatiquement à la prochaine synchronisation (~15 min) et crée la facture, suivie « à recevoir » (échéance NET 30).</div>
+              <div style="display:flex;flex-direction:column;gap:9px;">
+                <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                  <span style="font-size:12px;font-weight:700;min-width:200px;">Soumission (PDF) → facture à payer :</span>
+                  <input type="file" id="imp-soum-fact" accept="application/pdf" class="recherche" style="margin:0;">
+                  <button class="btn btn-or" onclick="docDeposerPdf('FACTURE','imp-soum-fact')">📄 Lire le PDF et créer la facture</button>
+                </div>
+                <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                  <span style="font-size:12px;font-weight:700;min-width:200px;">Facture déjà émise (PDF) :</span>
+                  <input type="file" id="imp-fact" accept="application/pdf" class="recherche" style="margin:0;">
+                  <button class="btn btn-or" onclick="docDeposerPdf('FACTURE','imp-fact')">🧾 Lire le PDF et créer la facture</button>
+                </div>
+              </div>
+              <div id="imp-msg" style="font-size:12px;font-weight:700;margin-top:8px;"></div>
             </div>
             <div id="mount-fact" style="margin:14px 18px 18px;overflow:auto;"></div>
           </div>
@@ -360,7 +379,7 @@ thead th .funnel.actif{opacity:1;color:var(--or-doux);}
     </div>
   </div>
 
-  <div class="pied">Prestige Construction EA · Portail directeur (lecture seule) · Les actions sont transmises au comptable pour validation.</div>
+  <div class="pied">Prestige Construction EA · Portail directeur · Onglet Clients modifiable (appliqué au bureau ~15 min) · Les paiements fournisseurs sont proposés au comptable pour validation.</div>
   </div>
 </div>
 
@@ -770,6 +789,26 @@ function saveDoc(){
     else toastEdit('md-msg', false, (r && r.erreur) || 'Erreur — réessayez.');
   }).catch(function(){ toastEdit('md-msg', false, 'Erreur réseau — réessayez.'); });
 }
+/* --- Import PDF (soumission/facture) → file appliquée au bureau ~15 min --- */
+function docDeposerPdf(typeDoc, inputId){
+  var f = document.getElementById(inputId);
+  var msg = document.getElementById('imp-msg');
+  function show(txt, err){ if(msg){ msg.textContent = txt; msg.style.color = err ? 'var(--rouge)' : 'var(--vert-tx)'; } }
+  if (!f || !f.files || !f.files[0]){ show('Choisissez un fichier PDF.', true); return; }
+  var file = f.files[0];
+  if ((file.type && file.type.indexOf('pdf') < 0) && !/\.pdf$/i.test(file.name)){ show('Le fichier doit être un PDF.', true); return; }
+  if (file.size > 10 * 1024 * 1024){ show('Fichier trop gros (max 10 Mo).', true); return; }
+  var reader = new FileReader();
+  reader.onload = function(){
+    var b64 = String(reader.result).split(',')[1] || '';
+    show('Envoi…', false);
+    rpc('portail_deposer_doc_pdf', { cle: CLE, p_type: typeDoc, p_nom: file.name, p_contenu_b64: b64 }).then(function(r){
+      if (r && r.ok){ show('✅ PDF déposé — la facture sera créée par le bureau d’ici ~15 min puis apparaîtra ici.', false); f.value = ''; }
+      else { show((r && r.erreur) || 'Refusé — réessayez ou contactez le bureau.', true); }
+    }).catch(function(){ show('Erreur réseau — réessayez.', true); });
+  };
+  reader.readAsDataURL(file);
+}
 
 /* ===== Comptes bancaires : dépôt de relevés + relevés reçus/manquants ===== */
 var CB_LOADED = false;
@@ -907,7 +946,8 @@ function GrilleP(mount, rows, cols, opts){
     var th=document.createElement('th');
     if(col.num) th.className='num';
     th.innerHTML='<span class="lbl">'+col.label+'</span> <span class="fl">⇅</span>'+(col.funnel?' <span class="funnel" title="Filtrer">▾</span>':'');
-    th.querySelector('.lbl').onclick=function(){ state.sortDir=(state.sortK===col.k)?-state.sortDir:1; state.sortK=col.k; apply(); };
+    th.style.cursor='pointer';
+    th.onclick=function(e){ if(e.target.classList.contains('funnel')) return; state.sortDir=(state.sortK===col.k)?-state.sortDir:1; state.sortK=col.k; apply(); };
     var fn=th.querySelector('.funnel'); if(fn) fn.onclick=function(e){ e.stopPropagation(); openFunnel(col, th); };
     trh.appendChild(th);
   });
